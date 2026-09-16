@@ -1,0 +1,348 @@
+# ---------------------------------------------------------------------------
+# NOT A PATCH THE TASK SHIPS. Assembled by the review pipeline for readability.
+#
+# This task ships no solution/solution.patch. Its image is not a git repository, so there is no base commit to diff a reference against; the reference solution ships as a script plus the source files it installs, which are all rendered below.
+# What follows is the content of the task's solution/ directory, rendered as additions against /dev/null so
+# that it can be read in a diff viewer. Nothing here was applied to anything.
+#
+# Source: solution/solve.sh, solution/recon_pipeline.py, solution/stages/aggregation.py, solution/stages/cctf.py, solution/stages/consolidation.py, solution/stages/recovery.py, solution/stages/replay.py
+# ---------------------------------------------------------------------------
+diff --git a/solution/solve.sh b/solution/solve.sh
+new file mode 100644
+--- /dev/null
++++ b/solution/solve.sh
+@@ -0,0 +1,26 @@
++#!/bin/bash
++set -e
++
++# Resolve the directory this script lives in so we can copy the reference
++# implementation modules that ship alongside it (solution/stages/*.py and
++# solution/recon_pipeline.py) into the workspace, rather than emitting them
++# via inline heredocs.
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++
++mkdir -p /workspace/coldchain-recon/stages
++
++# Stage 0: shared CCTF frame decoder + transactional recovery
++# Stage 1: Recovery
++# Stage 2: Aggregation
++# Stage 3: Replay
++# Stage 4: Consolidation
++cp "$SCRIPT_DIR/stages/cctf.py" /workspace/coldchain-recon/stages/cctf.py
++cp "$SCRIPT_DIR/stages/recovery.py" /workspace/coldchain-recon/stages/recovery.py
++cp "$SCRIPT_DIR/stages/aggregation.py" /workspace/coldchain-recon/stages/aggregation.py
++cp "$SCRIPT_DIR/stages/replay.py" /workspace/coldchain-recon/stages/replay.py
++cp "$SCRIPT_DIR/stages/consolidation.py" /workspace/coldchain-recon/stages/consolidation.py
++
++# Orchestrator
++cp "$SCRIPT_DIR/recon_pipeline.py" /workspace/coldchain-recon/recon_pipeline.py
++
++python3 /workspace/coldchain-recon/recon_pipeline.py
+
+diff --git a/solution/recon_pipeline.py b/solution/recon_pipeline.py
+new file mode 100644
+--- /dev/null
++++ b/solution/recon_pipeline.py
+@@ -0,0 +1,46 @@
++#!/usr/bin/env python3
++import argparse
++import json
++import os
++import sys
++
++sys.path.append(os.path.dirname(os.path.abspath(__file__)))
++
++from stages.recovery import recover_ledgers
++from stages.aggregation import aggregate_metrics
++from stages.replay import replay_dead_letters
++from stages.consolidation import consolidate_and_checksum
++
++BASE_DIR = os.path.dirname(os.path.abspath(__file__))
++
++def main():
++    parser = argparse.ArgumentParser(description="Cold-Chain CCTF Reconciliation Pipeline")
++    parser.add_argument("--config", default=os.path.join(BASE_DIR, "config/pipeline_config.json"))
++    parser.add_argument("--data-dir", default=os.path.join(BASE_DIR, "data/raw"))
++    parser.add_argument("--dlq-dir", default=os.path.join(BASE_DIR, "data/raw/dlq"))
++    parser.add_argument("--metrics-file", default=os.path.join(BASE_DIR, "data/raw/metrics.cctf"))
++    parser.add_argument("--output-dir", default=os.path.join(BASE_DIR, "data/processed"))
++    args = parser.parse_args()
++
++    os.makedirs(args.output_dir, exist_ok=True)
++    with open(args.config, "r") as fh:
++        config = json.load(fh)
++
++    recover_ledgers(args.data_dir, args.output_dir, config)
++
++    aggregated = aggregate_metrics(args.metrics_file, config)
++    with open(os.path.join(args.output_dir, "aggregated_metrics.json"), "w") as fh:
++        json.dump(aggregated, fh, indent=2)
++
++    combined, audit_rep = replay_dead_letters(args.output_dir, args.dlq_dir, config)
++    with open(os.path.join(args.output_dir, "audit_replay.json"), "w") as fh:
++        json.dump(audit_rep, fh, indent=2)
++
++    ledger_out = os.path.join(args.output_dir, "consolidated_ledger.json")
++    root_out = os.path.join(args.output_dir, "ledger_root.bin")
++    sig_out = os.path.join(args.output_dir, "ledger_signature.bin")
++    chk = consolidate_and_checksum(combined, ledger_out, root_out, sig_out)
++    print(f"Pipeline completed. Root: {chk}")
++
++if __name__ == "__main__":
++    main()
+
+diff --git a/solution/stages/aggregation.py b/solution/stages/aggregation.py
+new file mode 100644
+--- /dev/null
++++ b/solution/stages/aggregation.py
+@@ -0,0 +1,35 @@
++import json
++import os
++from stages.cctf import decode_frames, F_METRIC
++
++def aggregate_metrics(metrics_file: str, config: dict) -> list:
++    if not os.path.exists(metrics_file):
++        return []
++    with open(metrics_file, "rb") as fh:
++        raw = fh.read()
++    metrics = [json.loads(p.decode("utf-8")) for (v, t, s, p) in decode_frames(raw) if t == F_METRIC]
++    metric_cfg = config.get("metric_config", {})
++    whitelist = set(metric_cfg.get("whitelisted_attributes", []))
++    interval = metric_cfg.get("aggregation_interval_hours", 1) * 3600
++    groups = {}
++    for m in metrics:
++        name = m.get("metric_name")
++        ts = m.get("timestamp")
++        val = m.get("value")
++        attrs = m.get("attributes", {})
++        if ts is None or val is None or name is None:
++            continue
++        bucket = ts - (ts % interval)
++        filtered_attrs = {k: v for k, v in attrs.items() if k in whitelist}
++        group_key = (name, bucket, frozenset(filtered_attrs.items()))
++        groups.setdefault(group_key, []).append(val)
++    aggregated = []
++    for (name, bucket, attrs_fs), vals in groups.items():
++        aggregated.append({
++            "metric_name": name,
++            "timestamp": bucket,
++            "value": round(sum(vals) / len(vals), 4),
++            "attributes": dict(attrs_fs),
++        })
++    aggregated.sort(key=lambda x: (x["metric_name"], x["timestamp"], json.dumps(x["attributes"], sort_keys=True)))
++    return aggregated
+
+diff --git a/solution/stages/cctf.py b/solution/stages/cctf.py
+new file mode 100644
+--- /dev/null
++++ b/solution/stages/cctf.py
+@@ -0,0 +1,79 @@
++import struct
++import zlib
++import json
++
++MAGIC = b"CC"
++F_TXN = 1
++F_METRIC = 2
++F_COMMIT = 3
++F_ABORT = 4
++F_SAVEPOINT = 5
++F_ROLLBACK = 6
++
++def decode_frames(raw: bytes):
++    frames = []
++    off = 0
++    n = len(raw)
++    prev_chain = 0
++    while off < n:
++        if n - off < 10:
++            break
++        if raw[off:off + 2] != MAGIC:
++            break
++        version = raw[off + 2]
++        ftype = raw[off + 3]
++        seq = struct.unpack(">I", raw[off + 4:off + 8])[0]
++        plen = struct.unpack(">H", raw[off + 8:off + 10])[0]
++        frame_end = off + 10 + plen + 8
++        if frame_end > n:
++            break
++        body = raw[off:off + 10 + plen]
++        crc_stored = struct.unpack(">I", raw[off + 10 + plen:off + 10 + plen + 4])[0]
++        if (zlib.crc32(body) & 0xFFFFFFFF) != crc_stored:
++            break
++        chain_stored = struct.unpack(">I", raw[off + 10 + plen + 4:frame_end])[0]
++        chain_calc = zlib.crc32(struct.pack(">I", prev_chain) + struct.pack(">I", crc_stored)) & 0xFFFFFFFF
++        if chain_calc != chain_stored:
++            break
++        frames.append((version, ftype, seq, raw[off + 10:off + 10 + plen]))
++        prev_chain = chain_stored
++        off = frame_end
++    return frames
++
++def migrate_record(rec, version, schema_versions):
++    entry = schema_versions.get(str(version), {})
++    field = entry.get("temperature_field", "temperature_c")
++    scale = entry.get("scale", "celsius")
++    if field in rec:
++        val = rec[field]
++        if field != "temperature_c":
++            del rec[field]
++        rec["temperature_c"] = (val / 10.0) if scale == "deci_celsius" else val
++    return rec
++
++def recover_committed(frames, schema_versions):
++    committed = []
++    pending = []
++    savepoints = {}
++    for version, ftype, seq, payload in frames:
++        if ftype == F_TXN:
++            rec = json.loads(payload.decode("utf-8"))
++            migrate_record(rec, version, schema_versions)
++            pending.append(rec)
++        elif ftype == F_SAVEPOINT:
++            name = json.loads(payload.decode("utf-8"))["savepoint"]
++            savepoints[name] = len(pending)
++        elif ftype == F_ROLLBACK:
++            name = json.loads(payload.decode("utf-8"))["savepoint"]
++            if name in savepoints:
++                target = savepoints[name]
++                del pending[target:]
++                savepoints = {k: v for k, v in savepoints.items() if v <= target}
++        elif ftype == F_COMMIT:
++            committed.extend(pending)
++            pending = []
++            savepoints = {}
++        elif ftype == F_ABORT:
++            pending = []
++            savepoints = {}
++    return committed
+
+diff --git a/solution/stages/consolidation.py b/solution/stages/consolidation.py
+new file mode 100644
+--- /dev/null
++++ b/solution/stages/consolidation.py
+@@ -0,0 +1,33 @@
++import json
++import hashlib
++import hmac
++
++CHAIN_INIT = b"CCTF-ROOT-V1"
++SIG_PREFIX = b"coldchain-fleet|"
++HASH_FIELDS = ["transaction_id", "scanner_id", "sequence", "timestamp", "temperature_c"]
++
++def _projection(record):
++    obj = {}
++    for k in HASH_FIELDS:
++        if k == "temperature_c":
++            obj[k] = round(record["temperature_c"], 2)
++        else:
++            obj[k] = record[k]
++    return json.dumps(obj, separators=(",", ":"), sort_keys=True).encode("utf-8")
++
++def consolidate_and_checksum(all_records: list, output_path: str, root_path: str, sig_path: str) -> str:
++    all_records.sort(key=lambda x: (x.get("scanner_id", ""), x.get("sequence", 0), x.get("timestamp", 0)))
++    with open(output_path, "w") as fh:
++        json.dump(all_records, fh, indent=2)
++    state = hashlib.sha256(CHAIN_INIT).digest()
++    for r in all_records:
++        state = hashlib.sha256(state + _projection(r)).digest()
++    root = state
++    n = len(all_records)
++    key = hashlib.sha256(SIG_PREFIX + str(n).encode("utf-8")).digest()
++    sig = hmac.new(key, root, hashlib.sha256).digest()
++    with open(root_path, "wb") as fh:
++        fh.write(root)
++    with open(sig_path, "wb") as fh:
++        fh.write(sig)
++    return root.hex()
+
+diff --git a/solution/stages/recovery.py b/solution/stages/recovery.py
+new file mode 100644
+--- /dev/null
++++ b/solution/stages/recovery.py
+@@ -0,0 +1,38 @@
++import os
++import json
++from stages.cctf import decode_frames, recover_committed
++
++def _recover_committed(frames, schema_versions):
++    return recover_committed(frames, schema_versions)
++
++def recover_ledgers(data_dir: str, output_dir: str, config: dict = None) -> dict:
++    config = config or {}
++    schema_versions = config.get("schema_versions", {})
++    os.makedirs(output_dir, exist_ok=True)
++    scanners = {}
++    for f in os.listdir(data_dir):
++        if f.startswith("scanner_") and (f.endswith(".cctf") or f.endswith(".cctf.tmp")):
++            base = f[len("scanner_"):]
++            s_id = base.split(".cctf")[0]
++            scanners.setdefault(s_id, []).append(f)
++    audit = {}
++    for s_id, f_list in scanners.items():
++        all_records = []
++        for f in f_list:
++            with open(os.path.join(data_dir, f), "rb") as fh:
++                raw = fh.read()
++            all_records.extend(_recover_committed(decode_frames(raw), schema_versions))
++        dedup = {}
++        for r in all_records:
++            tx_id = r.get("transaction_id")
++            if not tx_id:
++                continue
++            if tx_id not in dedup or r.get("timestamp", 0) > dedup[tx_id].get("timestamp", 0):
++                dedup[tx_id] = r
++        recovered_list = list(dedup.values())
++        with open(os.path.join(output_dir, f"recovered_{s_id}.json"), "w") as fh:
++            json.dump(recovered_list, fh, indent=2)
++        audit[s_id] = len(recovered_list)
++    with open(os.path.join(output_dir, "audit_recovery.json"), "w") as fh:
++        json.dump(audit, fh, indent=2)
++    return audit
+
+diff --git a/solution/stages/replay.py b/solution/stages/replay.py
+new file mode 100644
+--- /dev/null
++++ b/solution/stages/replay.py
+@@ -0,0 +1,41 @@
++import os
++import json
++from stages.cctf import decode_frames, recover_committed
++
++def _recover_committed(frames, schema_versions):
++    return recover_committed(frames, schema_versions)
++
++def replay_dead_letters(recovered_dir: str, dlq_dir: str, config: dict) -> tuple:
++    lock_timeout = config.get("lock_timeout_sec", 60)
++    schema_versions = config.get("schema_versions", {})
++    recovered_records = {}
++    for f in os.listdir(recovered_dir):
++        if f.startswith("recovered_") and f.endswith(".json"):
++            with open(os.path.join(recovered_dir, f), "r") as fh:
++                for r in json.load(fh):
++                    tx_id = r.get("transaction_id")
++                    if tx_id:
++                        recovered_records[tx_id] = r
++    integrated_count = 0
++    duplicate_count = 0
++    if os.path.exists(dlq_dir):
++        for f in sorted(os.listdir(dlq_dir)):
++            if f.endswith(".cctf"):
++                with open(os.path.join(dlq_dir, f), "rb") as fh:
++                    raw = fh.read()
++                for dlq_r in _recover_committed(decode_frames(raw), schema_versions):
++                    tx_id = dlq_r.get("transaction_id")
++                    if not tx_id:
++                        continue
++                    if tx_id in recovered_records:
++                        diff = abs(dlq_r.get("timestamp", 0) - recovered_records[tx_id].get("timestamp", 0))
++                        if diff <= lock_timeout:
++                            duplicate_count += 1
++                        else:
++                            recovered_records[tx_id] = dlq_r
++                            integrated_count += 1
++                    else:
++                        recovered_records[tx_id] = dlq_r
++                        integrated_count += 1
++    audit = {"integrated_dlq_records": integrated_count, "discarded_duplicates": duplicate_count}
++    return list(recovered_records.values()), audit
