@@ -1,0 +1,1053 @@
+# ---------------------------------------------------------------------------
+# NOT A PATCH THE TASK SHIPS. Assembled by the review pipeline for readability.
+#
+# This task ships no tests/test.patch. Its graded tests are shipped as files and mounted into the container, so nothing is applied at scoring time.
+# What follows is the content of the task's tests/ directory, rendered as additions against /dev/null so
+# that it can be read in a diff viewer. Nothing here was applied to anything.
+#
+# Source: tests/generate_test_data.py, tests/test.sh, tests/test_outputs.py, tests/verify.py
+# ---------------------------------------------------------------------------
+diff --git a/tests/generate_test_data.py b/tests/generate_test_data.py
+new file mode 100644
+--- /dev/null
++++ b/tests/generate_test_data.py
+@@ -0,0 +1,453 @@
++import os
++import json
++import struct
++import zlib
++import hashlib
++import hmac
++import random
++import sys
++
++MAGIC = b"CC"
++F_TXN = 1
++F_METRIC = 2
++F_COMMIT = 3
++F_ABORT = 4
++F_SAVEPOINT = 5
++F_ROLLBACK = 6
++
++CHAIN_INIT = b"CCTF-ROOT-V1"
++SIG_PREFIX = b"coldchain-fleet|"
++HASH_FIELDS = ["transaction_id", "scanner_id", "sequence", "timestamp", "temperature_c"]
++
++SCHEMA_VERSIONS = {
++    "1": {"temperature_field": "temp", "scale": "celsius"},
++    "2": {"temperature_field": "temperature_c", "scale": "celsius"},
++    "3": {"temperature_field": "temp_dc", "scale": "deci_celsius"},
++}
++
++
++class Stream:
++    """Builds a CCTF stream, threading the per-frame chain link through frames."""
++
++    def __init__(self):
++        self.buf = b""
++        self.prev_chain = 0
++
++    def frame_bytes(self, version, ftype, seq, payload=b""):
++        head = MAGIC + struct.pack(">BB", version, ftype) + struct.pack(">I", seq) + struct.pack(">H", len(payload))
++        body = head + payload
++        crc = zlib.crc32(body) & 0xFFFFFFFF
++        chain = zlib.crc32(struct.pack(">I", self.prev_chain) + struct.pack(">I", crc)) & 0xFFFFFFFF
++        return body + struct.pack(">I", crc) + struct.pack(">I", chain), crc, chain
++
++    def add(self, version, ftype, seq, payload=b""):
++        frame, crc, chain = self.frame_bytes(version, ftype, seq, payload)
++        self.prev_chain = chain
++        self.buf += frame
++        return frame
++
++
++def txn_payload(version, tx_id, scanner_id, seq, ts, temp, battery):
++    if version == 1:
++        rec = {"transaction_id": tx_id, "scanner_id": scanner_id, "sequence": seq,
++               "timestamp": ts, "temp": temp, "battery_level": battery}
++    elif version == 2:
++        rec = {"transaction_id": tx_id, "scanner_id": scanner_id, "sequence": seq,
++               "timestamp": ts, "temperature_c": temp, "battery_level": battery, "fw": "fw_2.3.1"}
++    else:
++        rec = {"transaction_id": tx_id, "scanner_id": scanner_id, "sequence": seq,
++               "timestamp": ts, "temp_dc": int(round(temp * 10)), "battery_level": battery, "fw": "fw_3.1.0"}
++    return json.dumps(rec, separators=(",", ":")).encode("utf-8")
++
++
++def sp_payload(name):
++    return json.dumps({"savepoint": name}, separators=(",", ":")).encode("utf-8")
++
++
++def metric_payload(rec):
++    return json.dumps(rec, separators=(",", ":")).encode("utf-8")
++
++
++def _temp(s_idx, seq):
++    return round(-20.0 + (seq % 10) * 0.5 + s_idx * 0.2 + seq * 0.0137, 4)
++
++
++def _temp_v3(s_idx, seq):
++    # one-decimal Celsius so the deci-Celsius integer round-trips exactly
++    return round(-20.0 + (seq % 10) * 0.5 + s_idx * 0.2, 1)
++
++
++def _canon_temp(version, temp):
++    if version == 3:
++        return int(round(temp * 10)) / 10.0
++    return temp
++
++
++def _build_scanner_files(data_dir, seed):
++    start_ts = 1717200000 + seed * 3
++    tx_map = {}
++
++    def reg(tx_id, scanner_id, seq, ts, temp, battery, version):
++        norm = {"transaction_id": tx_id, "scanner_id": scanner_id, "sequence": seq,
++                "timestamp": ts, "temperature_c": _canon_temp(version, temp), "battery_level": battery}
++        if version in (2, 3):
++            norm["fw"] = "fw_2.3.1" if version == 2 else "fw_3.1.0"
++        tx_map[tx_id] = norm
++
++    # scan_001: clean v3 firmware (integer deci-Celsius temperatures), all committed,
++    # txns in commit epochs of 10.
++    s = Stream()
++    n1 = 40 + (seed % 5)
++    for seq in range(1, n1 + 1):
++        tx_id = f"tx_scan_001_{seq:03d}"
++        ts = start_ts + seq * 10
++        temp = _temp_v3(0, seq)
++        s.add(3, F_TXN, seq, txn_payload(3, tx_id, "scan_001", seq, ts, temp, max(40, 100 - seq)))
++        reg(tx_id, "scan_001", seq, ts, temp, max(40, 100 - seq), 3)
++        if seq % 10 == 0:
++            s.add(3, F_COMMIT, seq)
++    if n1 % 10 != 0:
++        s.add(3, F_COMMIT, n1)
++    with open(os.path.join(data_dir, "scanner_scan_001.cctf"), "wb") as fh:
++        fh.write(s.buf)
++
++    # scan_002: v2, 25 committed then 5 uncommitted tail with truncated trailing COMMIT.
++    s = Stream()
++    for seq in range(1, 26):
++        tx_id = f"tx_scan_002_{seq:03d}"
++        ts = start_ts + seq * 10
++        temp = _temp(1, seq)
++        s.add(2, F_TXN, seq, txn_payload(2, tx_id, "scan_002", seq, ts, temp, max(40, 100 - seq)))
++        reg(tx_id, "scan_002", seq, ts, temp, max(40, 100 - seq), 2)
++    s.add(2, F_COMMIT, 25)
++    for seq in range(26, 31):
++        tx_id = f"tx_scan_002_{seq:03d}"
++        ts = start_ts + seq * 10
++        s.add(2, F_TXN, seq, txn_payload(2, tx_id, "scan_002", seq, ts, _temp(1, seq), max(40, 100 - seq)))
++    trailing_commit, _, _ = s.frame_bytes(2, F_COMMIT, 30)
++    buf = s.buf + trailing_commit[:-3]  # truncate the final COMMIT frame (power cut)
++    with open(os.path.join(data_dir, "scanner_scan_002.cctf"), "wb") as fh:
++        fh.write(buf)
++
++    # scan_003: rename gap, v1 both files. .cctf has 15 (lower ts), .cctf.tmp has 20 (higher ts).
++    s = Stream()
++    for seq in range(1, 16):
++        tx_id = f"tx_scan_003_{seq:03d}"
++        ts = start_ts + seq * 10
++        s.add(1, F_TXN, seq, txn_payload(1, tx_id, "scan_003", seq, ts, _temp(2, seq), max(40, 100 - seq)))
++    s.add(1, F_COMMIT, 15)
++    buf_main = s.buf + b"\x43\x43\x01\x01\x00\x00"  # corrupt tail (incomplete trailing bytes)
++    with open(os.path.join(data_dir, "scanner_scan_003.cctf"), "wb") as fh:
++        fh.write(buf_main)
++
++    s = Stream()
++    for seq in range(1, 21):
++        tx_id = f"tx_scan_003_{seq:03d}"
++        ts = start_ts + seq * 10 + 5  # higher timestamp => wins dedup
++        temp = _temp(2, seq)
++        s.add(1, F_TXN, seq, txn_payload(1, tx_id, "scan_003", seq, ts, temp, max(40, 100 - seq)))
++        reg(tx_id, "scan_003", seq, ts, temp, max(40, 100 - seq), 1)
++    s.add(1, F_COMMIT, 20)
++    with open(os.path.join(data_dir, "scanner_scan_003.cctf.tmp"), "wb") as fh:
++        fh.write(s.buf)
++
++    # scan_004: v2, 12 committed, then 6 more TXN followed by a COMMIT whose CHAIN link is
++    # corrupted (its own CRC stays valid). The chain break is the corruption boundary, so the
++    # 6 trailing TXNs are never committed -> 12 recovered. A decoder that skips chain
++    # validation would wrongly commit 18.
++    s = Stream()
++    for seq in range(1, 13):
++        tx_id = f"tx_scan_004_{seq:03d}"
++        ts = start_ts + seq * 10
++        temp = _temp(3, seq)
++        s.add(2, F_TXN, seq, txn_payload(2, tx_id, "scan_004", seq, ts, temp, max(40, 100 - seq)))
++        reg(tx_id, "scan_004", seq, ts, temp, max(40, 100 - seq), 2)
++    s.add(2, F_COMMIT, 12)
++    for seq in range(13, 19):
++        tx_id = f"tx_scan_004_{seq:03d}"
++        ts = start_ts + seq * 10
++        s.add(2, F_TXN, seq, txn_payload(2, tx_id, "scan_004", seq, ts, _temp(3, seq), max(40, 100 - seq)))
++    bad_commit, _, _ = s.frame_bytes(2, F_COMMIT, 18)
++    bad = bytearray(bad_commit)
++    bad[-1] ^= 0xFF  # corrupt the trailing chain link (CRC remains valid)
++    buf = s.buf + bytes(bad)
++    with open(os.path.join(data_dir, "scanner_scan_004.cctf"), "wb") as fh:
++        fh.write(buf)
++
++    # scan_005: v1, clean, 30 committed (some receive DLQ corrections).
++    s = Stream()
++    for seq in range(1, 31):
++        tx_id = f"tx_scan_005_{seq:03d}"
++        ts = start_ts + seq * 10
++        temp = _temp(4, seq)
++        s.add(1, F_TXN, seq, txn_payload(1, tx_id, "scan_005", seq, ts, temp, max(40, 100 - seq)))
++        reg(tx_id, "scan_005", seq, ts, temp, max(40, 100 - seq), 1)
++    s.add(1, F_COMMIT, 30)
++    with open(os.path.join(data_dir, "scanner_scan_005.cctf"), "wb") as fh:
++        fh.write(s.buf)
++
++    # scan_006: v3, savepoint/rollback/abort interplay then a bad-CRC boundary.
++    #   TXN1, TXN2, SAVEPOINT sp1, TXN3, TXN4, ROLLBACK sp1 (drop 3,4), TXN5, COMMIT -> {1,2,5}
++    #   TXN6, TXN7, ABORT (drop)
++    #   TXN8, COMMIT -> {8}
++    #   TXN9 (pending), bad-CRC frame -> boundary (drop 9)
++    # recovered = {1,2,5,8}
++    s = Stream()
++
++    def v3_txn(seq, batt=90):
++        tx_id = f"tx_scan_006_{seq:03d}"
++        ts = start_ts + seq * 10
++        temp = _temp_v3(5, seq)
++        s.add(3, F_TXN, seq, txn_payload(3, tx_id, "scan_006", seq, ts, temp, batt))
++        return tx_id, ts, temp
++
++    committed_seqs = []
++    t1 = v3_txn(1); t2 = v3_txn(2)
++    s.add(3, F_SAVEPOINT, 0, sp_payload("sp1"))
++    v3_txn(3); v3_txn(4)
++    s.add(3, F_ROLLBACK, 0, sp_payload("sp1"))
++    t5 = v3_txn(5)
++    s.add(3, F_COMMIT, 5)
++    committed_seqs += [1, 2, 5]
++    v3_txn(6); v3_txn(7)
++    s.add(3, F_ABORT, 0)
++    t8 = v3_txn(8)
++    s.add(3, F_COMMIT, 8)
++    committed_seqs += [8]
++    v3_txn(9)
++    bad_frame, _, _ = s.frame_bytes(3, F_TXN, 99, txn_payload(3, "tx_scan_006_099", "scan_006", 99, start_ts + 990, _temp_v3(5, 99), 80))
++    bad = bytearray(bad_frame)
++    bad[-5] ^= 0xFF  # corrupt the CRC (within the crc field) -> boundary at this frame
++    buf = s.buf + bytes(bad)
++    with open(os.path.join(data_dir, "scanner_scan_006.cctf"), "wb") as fh:
++        fh.write(buf)
++
++    return tx_map, start_ts
++
++
++def _build_metrics(data_dir, seed):
++    warehouses = ["wh_north", "wh_south", "wh_east"]
++    zones = ["zone_A", "zone_B", "zone_C"]
++    scanners = ["scan_001", "scan_002", "scan_003", "scan_004", "scan_005"]
++    s = Stream()
++    count = 1500 + (seed % 5) * 30
++    for i in range(count):
++        wh = warehouses[i % len(warehouses)]
++        zone = zones[(i // 3) % len(zones)]
++        s_id = scanners[i % len(scanners)]
++        metric_name = "temp_reading" if i % 2 == 0 else "humidity_reading"
++        ts = 1717200000 + (i * 7)
++        rec = {
++            "metric_name": metric_name,
++            "timestamp": ts,
++            "value": round(-18.5 + (i % 15) * 0.1, 2) if metric_name == "temp_reading" else round(45.0 + (i % 20) * 0.5, 2),
++            "attributes": {
++                "warehouse_id": wh,
++                "zone_id": zone,
++                "scanner_id": s_id,
++                "session_id": f"sess_{seed}_{i}",
++                "request_id": f"req_{seed}_{i * 13}",
++                "client_ip": f"10.0.1.{i % 254}",
++            },
++        }
++        s.add(2, F_METRIC, i, metric_payload(rec))
++    # truncated trailing frame (power cut) -> must be ignored, prior 'count' kept
++    tail, _, _ = s.frame_bytes(2, F_METRIC, count, metric_payload({"metric_name": "temp_reading", "timestamp": 1, "value": 0.0, "attributes": {}}))
++    buf = s.buf + tail[: len(tail) // 2]
++    with open(os.path.join(data_dir, "metrics.cctf"), "wb") as fh:
++        fh.write(buf)
++
++
++def _build_dlq(data_dir, tx_map, start_ts, seed):
++    dlq_dir = os.path.join(data_dir, "dlq")
++    os.makedirs(dlq_dir, exist_ok=True)
++    rng = random.Random(seed)
++
++    dlq_records = []
++    dup_txs = ["tx_scan_005_010", "tx_scan_005_020", "tx_scan_002_015"]
++    for tx_id in dup_txs:
++        orig = tx_map[tx_id]
++        dlq_records.append({
++            "transaction_id": tx_id, "scanner_id": orig["scanner_id"], "sequence": orig["sequence"],
++            "timestamp": orig["timestamp"] + rng.choice([-30, -10, 10, 30]),
++            "temperature_c": orig["temperature_c"], "battery_level": orig["battery_level"], "fw": "fw_2.3.1",
++        })
++    corr_txs = ["tx_scan_005_025", "tx_scan_002_020"]
++    for tx_id in corr_txs:
++        orig = tx_map[tx_id]
++        dlq_records.append({
++            "transaction_id": tx_id, "scanner_id": orig["scanner_id"], "sequence": orig["sequence"],
++            "timestamp": orig["timestamp"] + 120,
++            "temperature_c": round(orig["temperature_c"] - 1.5, 4), "battery_level": orig["battery_level"] - 1, "fw": "fw_2.3.1",
++        })
++    for i in range(1, 11):
++        dlq_records.append({
++            "transaction_id": f"tx_dlq_late_{i:03d}", "scanner_id": "scan_005", "sequence": 100 + i,
++            "timestamp": 1717210000 + i * 10, "temperature_c": -19.1234, "battery_level": 85, "fw": "fw_2.3.1",
++        })
++
++    rng.shuffle(dlq_records)
++    chunk_size = (len(dlq_records) + 2) // 3
++    for idx in range(3):
++        chunk = dlq_records[idx * chunk_size:(idx + 1) * chunk_size]
++        s = Stream()
++        for seq, rec in enumerate(chunk, start=1):
++            s.add(2, F_TXN, seq, json.dumps(rec, separators=(",", ":")).encode("utf-8"))
++        s.add(2, F_COMMIT, len(chunk))
++        with open(os.path.join(dlq_dir, f"dlq_batch_{idx + 1}.cctf"), "wb") as fh:
++            fh.write(s.buf)
++
++
++def generate_all_data(data_dir, seed=42):
++    os.makedirs(data_dir, exist_ok=True)
++    tx_map, start_ts = _build_scanner_files(data_dir, seed)
++    _build_metrics(data_dir, seed)
++    _build_dlq(data_dir, tx_map, start_ts, seed)
++
++
++# ---- golden reference artifacts (self-contained worked example) ----
++
++def _decode_frames(raw):
++    frames = []
++    off = 0
++    n = len(raw)
++    prev_chain = 0
++    while off < n:
++        if n - off < 10:
++            break
++        if raw[off:off + 2] != MAGIC:
++            break
++        version = raw[off + 2]
++        ftype = raw[off + 3]
++        seq = struct.unpack(">I", raw[off + 4:off + 8])[0]
++        plen = struct.unpack(">H", raw[off + 8:off + 10])[0]
++        frame_end = off + 10 + plen + 8
++        if frame_end > n:
++            break
++        body = raw[off:off + 10 + plen]
++        crc_stored = struct.unpack(">I", raw[off + 10 + plen:off + 10 + plen + 4])[0]
++        if (zlib.crc32(body) & 0xFFFFFFFF) != crc_stored:
++            break
++        chain_stored = struct.unpack(">I", raw[off + 10 + plen + 4:frame_end])[0]
++        chain_calc = zlib.crc32(struct.pack(">I", prev_chain) + struct.pack(">I", crc_stored)) & 0xFFFFFFFF
++        if chain_calc != chain_stored:
++            break
++        frames.append((version, ftype, seq, raw[off + 10:off + 10 + plen]))
++        prev_chain = chain_stored
++        off = frame_end
++    return frames
++
++
++def _migrate(rec, version, schema_versions):
++    entry = schema_versions.get(str(version), {})
++    field = entry.get("temperature_field", "temperature_c")
++    scale = entry.get("scale", "celsius")
++    if field in rec:
++        val = rec[field]
++        if field != "temperature_c":
++            del rec[field]
++        rec["temperature_c"] = (val / 10.0) if scale == "deci_celsius" else val
++    return rec
++
++
++def _recover(frames, schema_versions):
++    committed = []
++    pending = []
++    savepoints = {}
++    for version, ftype, seq, payload in frames:
++        if ftype == F_TXN:
++            rec = json.loads(payload.decode("utf-8"))
++            _migrate(rec, version, schema_versions)
++            pending.append(rec)
++        elif ftype == F_SAVEPOINT:
++            name = json.loads(payload.decode("utf-8"))["savepoint"]
++            savepoints[name] = len(pending)
++        elif ftype == F_ROLLBACK:
++            name = json.loads(payload.decode("utf-8"))["savepoint"]
++            if name in savepoints:
++                target = savepoints[name]
++                del pending[target:]
++                savepoints = {k: v for k, v in savepoints.items() if v <= target}
++        elif ftype == F_COMMIT:
++            committed.extend(pending)
++            pending = []
++            savepoints = {}
++        elif ftype == F_ABORT:
++            pending = []
++            savepoints = {}
++    return committed
++
++
++def _projection(record):
++    obj = {}
++    for k in HASH_FIELDS:
++        if k == "temperature_c":
++            obj[k] = round(record["temperature_c"], 2)
++        else:
++            obj[k] = record[k]
++    return json.dumps(obj, separators=(",", ":"), sort_keys=True).encode("utf-8")
++
++
++def _chain_root(sorted_records):
++    state = hashlib.sha256(CHAIN_INIT).digest()
++    for r in sorted_records:
++        state = hashlib.sha256(state + _projection(r)).digest()
++    return state
++
++
++def emit_golden(golden_dir):
++    os.makedirs(golden_dir, exist_ok=True)
++    # Tiny v3 example exercising the deci-Celsius transform, a savepoint/rollback,
++    # an uncommitted tail TXN, and a truncated trailing COMMIT.
++    #   TXN1, TXN2, SAVEPOINT sp, TXN3, ROLLBACK sp (drop 3), TXN4, COMMIT -> {1,2,4}
++    #   TXN5 (pending), truncated COMMIT -> boundary (drop 5)
++    s = Stream()
++    base = 1717200000
++
++    def gtxn(seq, temp_c):
++        s.add(3, F_TXN, seq, txn_payload(3, f"tx_g_{seq:03d}", "scan_g", seq, base + seq * 10, temp_c, 99 - seq))
++
++    gtxn(1, -18.3)
++    gtxn(2, -17.9)
++    s.add(3, F_SAVEPOINT, 0, sp_payload("sp"))
++    gtxn(3, -16.5)
++    s.add(3, F_ROLLBACK, 0, sp_payload("sp"))
++    gtxn(4, -15.2)
++    s.add(3, F_COMMIT, 4)
++    gtxn(5, -14.0)
++    trailing, _, _ = s.frame_bytes(3, F_COMMIT, 5)
++    buf = s.buf + trailing[:-3]
++    with open(os.path.join(golden_dir, "sample_scanner.cctf"), "wb") as fh:
++        fh.write(buf)
++
++    frames = _decode_frames(buf)
++    recovered = _recover(frames, SCHEMA_VERSIONS)
++    with open(os.path.join(golden_dir, "sample_recovered.json"), "w") as fh:
++        json.dump(recovered, fh, indent=2)
++
++    canon_lines = [_projection(r).decode("utf-8") for r in recovered]
++    with open(os.path.join(golden_dir, "sample_canonical.txt"), "w") as fh:
++        fh.write("\n".join(canon_lines) + "\n")
++
++    sorted_recs = sorted(recovered, key=lambda x: (x.get("scanner_id", ""), x.get("sequence", 0), x.get("timestamp", 0)))
++    root = _chain_root(sorted_recs)
++    n = len(sorted_recs)
++    key = hashlib.sha256(SIG_PREFIX + str(n).encode("utf-8")).digest()
++    sig = hmac.new(key, root, hashlib.sha256).digest()
++    with open(os.path.join(golden_dir, "sample_root.hex"), "w") as fh:
++        fh.write(root.hex() + "\n")
++    with open(os.path.join(golden_dir, "sample_signature.hex"), "w") as fh:
++        fh.write(sig.hex() + "\n")
++
++
++if __name__ == "__main__":
++    import argparse
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--data-dir", default="data/raw")
++    parser.add_argument("--seed", type=int, default=42)
++    parser.add_argument("--emit-golden", default=None)
++    args = parser.parse_args()
++    if args.emit_golden:
++        emit_golden(args.emit_golden)
++    else:
++        generate_all_data(args.data_dir, args.seed)
+
+diff --git a/tests/test.sh b/tests/test.sh
+new file mode 100644
+--- /dev/null
++++ b/tests/test.sh
+@@ -0,0 +1,60 @@
++#!/bin/bash
++set -euo pipefail
++
++# python3 / python3-pip / python3-pytest are baked into the image at build time;
++# no runtime install needed (sandbox has no internet).
++
++# ── Service bootstrap (if needed) ──────────────────────────────────────
++# Start any services the task requires.
++# Database tasks: start the DB server and wait for readiness.
++
++if command -v pg_isready &>/dev/null && [ -d /var/lib/postgresql ]; then
++    su - postgres -c "pg_ctlcluster $(pg_lsclusters -h | awk '{print $1, $2}') start" 2>/dev/null || true
++    for i in $(seq 1 30); do su - postgres -c "pg_isready" &>/dev/null && break; sleep 1; done
++fi
++
++if command -v mysqld_safe &>/dev/null && [ -d /var/lib/mysql ]; then
++    mysqld_safe --skip-networking=0 &
++    for i in $(seq 1 30); do mysqladmin ping --silent 2>/dev/null && break; sleep 1; done
++fi
++
++if command -v redis-server &>/dev/null && [ -f /etc/redis/redis.conf ]; then
++    redis-server /etc/redis/redis.conf --daemonize no 2>/dev/null &
++    for i in $(seq 1 30); do redis-cli ping 2>/dev/null | grep -q PONG && break; sleep 1; done
++fi
++
++if command -v mongod &>/dev/null && [ -d /var/lib/mongodb ]; then
++    mongod --config /etc/mongod.conf 2>/dev/null &
++    for i in $(seq 1 30); do mongosh --quiet --eval "db.runCommand({ping:1})" &>/dev/null && break; sleep 1; done
++fi
++
++# ── Run pytest with CTRF output ────────────────────────────────────────
++mkdir -p /app
++cd /app
++
++# pytest is provided by the Dockerfile (python3-pytest); no runtime install.
++
++# Copy test file from /tests into workspace
++mkdir -p /app
++cp /tests/test_outputs.py /app/test_outputs.py 2>/dev/null || true
++
++# Run tests (disable errexit to capture exit code and write reward file).
++# Avoid fail-fast so Harbor sees the full failing surface for partial scoring.
++set +e
++python3 -m pytest /app/test_outputs.py --no-header -p no:cacheprovider -vs 2>&1
++test_status=$?
++set -e
++
++# Ensure logs directories exist (Harbor mounts /logs but may not create subdirs).
++# Write reward to BOTH locations: nexus sandbox reads /logs/tests, Modal verifier reads /logs/verifier.
++mkdir -p /logs/verifier /logs/tests
++
++if [ $test_status -eq 0 ]; then
++    echo 1 > /logs/verifier/reward.txt
++    echo 1 > /logs/tests/reward.txt
++else
++    echo 0 > /logs/verifier/reward.txt
++    echo 0 > /logs/tests/reward.txt
++fi
++
++exit "$test_status"
+
+diff --git a/tests/test_outputs.py b/tests/test_outputs.py
+new file mode 100644
+--- /dev/null
++++ b/tests/test_outputs.py
+@@ -0,0 +1,90 @@
++"""Auto-generated validation tests for terminal-bench task.
++
++Task: coldchain-reconciliation-pipeline
++Category: data-processing/binary-wire-protocol-transactional-recovery
++"""
++
++import subprocess
++
++
++def _run(cmd: str) -> subprocess.CompletedProcess:
++    return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=120)
++
++
++def test_check_1():
++    """Stage 1: CCTF decode, CRC/truncation boundary, commit/rollback, schema migration, rename-gap merge"""
++    result = _run('python3 /tests/verify.py --stage 1')
++    output = result.stdout + result.stderr
++    assert 'STAGE 1 OK' in output, (
++        f"Expected substring not found for: Stage 1 recovery\n"
++        f"Expected: 'STAGE 1 OK'\nOutput: {output[:600]}"
++    )
++
++
++def test_check_2():
++    """Stage 2: metric-frame decode, whitelist filter, hourly aggregation"""
++    result = _run('python3 /tests/verify.py --stage 2')
++    output = result.stdout + result.stderr
++    assert 'STAGE 2 OK' in output, (
++        f"Expected substring not found for: Stage 2 aggregation\n"
++        f"Expected: 'STAGE 2 OK'\nOutput: {output[:600]}"
++    )
++
++
++def test_check_3():
++    """Stage 3: DLQ replay duplicate vs lineage-correction within/beyond lock timeout"""
++    result = _run('python3 /tests/verify.py --stage 3')
++    output = result.stdout + result.stderr
++    assert 'STAGE 3 OK' in output, (
++        f"Expected substring not found for: Stage 3 DLQ replay\n"
++        f"Expected: 'STAGE 3 OK'\nOutput: {output[:600]}"
++    )
++
++
++def test_check_4():
++    """Stage 4: canonical sort, chained SHA-256 root, and count-derived HMAC signature"""
++    result = _run('python3 /tests/verify.py --stage 4')
++    output = result.stdout + result.stderr
++    assert 'STAGE 4 AND CHECKSUM OK' in output, (
++        f"Expected substring not found for: Stage 4 consolidation/checksum\n"
++        f"Expected: 'STAGE 4 AND CHECKSUM OK'\nOutput: {output[:600]}"
++    )
++
++
++def test_check_5():
++    """Resilience: re-run the pipeline against freshly generated, randomized inputs"""
++    result = _run('python3 /tests/verify.py --mutated')
++    output = result.stdout + result.stderr
++    assert 'MUTATED RUN OK' in output, (
++        f"Expected substring not found for: mutated-data run\n"
++        f"Expected: 'MUTATED RUN OK'\nOutput: {output[:600]}"
++    )
++
++
++def test_check_6():
++    """Anti-shortcut: no hardcoded digests/constants inside the implemented modules"""
++    result = _run('python3 /tests/verify.py --anti-shortcut')
++    output = result.stdout + result.stderr
++    assert 'ANTI-SHORTCUT OK' in output, (
++        f"Expected substring not found for: anti-shortcut\n"
++        f"Expected: 'ANTI-SHORTCUT OK'\nOutput: {output[:600]}"
++    )
++
++
++def test_check_7():
++    """Orchestrator runs all four stages end to end and exits 0"""
++    result = _run('python3 /workspace/coldchain-recon/recon_pipeline.py')
++    assert result.returncode == 0, (
++        f"Command failed (exit {result.returncode}): orchestrator end-to-end run\n"
++        f"stdout: {result.stdout}\nstderr: {result.stderr}"
++    )
++
++
++def test_check_8():
++    """Idempotence: a second successive run still reproduces the sealed ledger and signature"""
++    result = _run('python3 /workspace/coldchain-recon/recon_pipeline.py && python3 /tests/verify.py --stage 4')
++    output = result.stdout + result.stderr
++    assert 'STAGE 4 AND CHECKSUM OK' in output, (
++        f"Expected substring not found for: idempotence rerun\n"
++        f"Expected: 'STAGE 4 AND CHECKSUM OK'\nOutput: {output[:600]}"
++    )
+
+diff --git a/tests/verify.py b/tests/verify.py
+new file mode 100644
+--- /dev/null
++++ b/tests/verify.py
+@@ -0,0 +1,418 @@
++import os
++import json
++import struct
++import zlib
++import hashlib
++import hmac
++import re
++import sys
++import subprocess
++
++MAGIC = b"CC"
++F_TXN = 1
++F_METRIC = 2
++F_COMMIT = 3
++F_ABORT = 4
++F_SAVEPOINT = 5
++F_ROLLBACK = 6
++
++CHAIN_INIT = b"CCTF-ROOT-V1"
++SIG_PREFIX = b"coldchain-fleet|"
++HASH_FIELDS = ["transaction_id", "scanner_id", "sequence", "timestamp", "temperature_c"]
++
++
++def decode_frames(raw):
++    frames = []
++    off = 0
++    n = len(raw)
++    prev_chain = 0
++    while off < n:
++        if n - off < 10:
++            break
++        if raw[off:off + 2] != MAGIC:
++            break
++        version = raw[off + 2]
++        ftype = raw[off + 3]
++        seq = struct.unpack(">I", raw[off + 4:off + 8])[0]
++        plen = struct.unpack(">H", raw[off + 8:off + 10])[0]
++        frame_end = off + 10 + plen + 8
++        if frame_end > n:
++            break
++        body = raw[off:off + 10 + plen]
++        crc_stored = struct.unpack(">I", raw[off + 10 + plen:off + 10 + plen + 4])[0]
++        if (zlib.crc32(body) & 0xFFFFFFFF) != crc_stored:
++            break
++        chain_stored = struct.unpack(">I", raw[off + 10 + plen + 4:frame_end])[0]
++        chain_calc = zlib.crc32(struct.pack(">I", prev_chain) + struct.pack(">I", crc_stored)) & 0xFFFFFFFF
++        if chain_calc != chain_stored:
++            break
++        frames.append((version, ftype, seq, raw[off + 10:off + 10 + plen]))
++        prev_chain = chain_stored
++        off = frame_end
++    return frames
++
++
++def _migrate(rec, version, schema_versions):
++    entry = schema_versions.get(str(version), {})
++    field = entry.get("temperature_field", "temperature_c")
++    scale = entry.get("scale", "celsius")
++    if field in rec:
++        val = rec[field]
++        if field != "temperature_c":
++            del rec[field]
++        rec["temperature_c"] = (val / 10.0) if scale == "deci_celsius" else val
++    return rec
++
++
++def recover_committed(frames, schema_versions):
++    committed = []
++    pending = []
++    savepoints = {}
++    for version, ftype, seq, payload in frames:
++        if ftype == F_TXN:
++            rec = json.loads(payload.decode("utf-8"))
++            _migrate(rec, version, schema_versions)
++            pending.append(rec)
++        elif ftype == F_SAVEPOINT:
++            name = json.loads(payload.decode("utf-8"))["savepoint"]
++            savepoints[name] = len(pending)
++        elif ftype == F_ROLLBACK:
++            name = json.loads(payload.decode("utf-8"))["savepoint"]
++            if name in savepoints:
++                target = savepoints[name]
++                del pending[target:]
++                savepoints = {k: v for k, v in savepoints.items() if v <= target}
++        elif ftype == F_COMMIT:
++            committed.extend(pending)
++            pending = []
++            savepoints = {}
++        elif ftype == F_ABORT:
++            pending = []
++            savepoints = {}
++    return committed
++
++
++def get_reference_recovery(data_dir, config):
++    schema_versions = config.get("schema_versions", {})
++    files = os.listdir(data_dir)
++    scanners = {}
++    for f in files:
++        if f.startswith("scanner_") and (f.endswith(".cctf") or f.endswith(".cctf.tmp")):
++            base = f[len("scanner_"):]
++            s_id = base.split(".cctf")[0]
++            scanners.setdefault(s_id, []).append(f)
++    ref_audit = {}
++    ref_records_by_scanner = {}
++    for s_id, f_list in scanners.items():
++        all_records = []
++        for f in f_list:
++            with open(os.path.join(data_dir, f), "rb") as fh:
++                raw = fh.read()
++            all_records.extend(recover_committed(decode_frames(raw), schema_versions))
++        dedup = {}
++        for r in all_records:
++            tx_id = r.get("transaction_id")
++            if not tx_id:
++                continue
++            if tx_id not in dedup or r.get("timestamp", 0) > dedup[tx_id].get("timestamp", 0):
++                dedup[tx_id] = r
++        ref_records_by_scanner[s_id] = list(dedup.values())
++        ref_audit[s_id] = len(ref_records_by_scanner[s_id])
++    return ref_audit, ref_records_by_scanner
++
++
++def get_reference_aggregation(metrics_file, config):
++    if not os.path.exists(metrics_file):
++        return []
++    with open(metrics_file, "rb") as fh:
++        raw = fh.read()
++    metrics = [json.loads(p.decode("utf-8")) for (v, t, s, p) in decode_frames(raw) if t == F_METRIC]
++    metric_cfg = config.get("metric_config", {})
++    whitelist = set(metric_cfg.get("whitelisted_attributes", []))
++    interval = metric_cfg.get("aggregation_interval_hours", 1) * 3600
++    groups = {}
++    for m in metrics:
++        name = m.get("metric_name")
++        ts = m.get("timestamp")
++        val = m.get("value")
++        attrs = m.get("attributes", {})
++        if ts is None or val is None or name is None:
++            continue
++        bucket = ts - (ts % interval)
++        filtered_attrs = {k: v for k, v in attrs.items() if k in whitelist}
++        group_key = (name, bucket, frozenset(filtered_attrs.items()))
++        groups.setdefault(group_key, []).append(val)
++    aggregated = []
++    for (name, bucket, attrs_fs), vals in groups.items():
++        mean_val = sum(vals) / len(vals)
++        aggregated.append({
++            "metric_name": name,
++            "timestamp": bucket,
++            "value": round(mean_val, 4),
++            "attributes": dict(attrs_fs),
++        })
++    aggregated.sort(key=lambda x: (x["metric_name"], x["timestamp"], json.dumps(x["attributes"], sort_keys=True)))
++    return aggregated
++
++
++def get_reference_replay(recovered_records_by_scanner, dlq_dir, config):
++    lock_timeout = config.get("lock_timeout_sec", 60)
++    schema_versions = config.get("schema_versions", {})
++    recovered_records = {}
++    for s_id, r_list in recovered_records_by_scanner.items():
++        for r in r_list:
++            tx_id = r.get("transaction_id")
++            if tx_id:
++                recovered_records[tx_id] = r
++    integrated_count = 0
++    duplicate_count = 0
++    if os.path.exists(dlq_dir):
++        for f in sorted(os.listdir(dlq_dir)):
++            if f.endswith(".cctf"):
++                with open(os.path.join(dlq_dir, f), "rb") as fh:
++                    raw = fh.read()
++                for dlq_r in recover_committed(decode_frames(raw), schema_versions):
++                    tx_id = dlq_r.get("transaction_id")
++                    if not tx_id:
++                        continue
++                    if tx_id in recovered_records:
++                        diff = abs(dlq_r.get("timestamp", 0) - recovered_records[tx_id].get("timestamp", 0))
++                        if diff <= lock_timeout:
++                            duplicate_count += 1
++                        else:
++                            recovered_records[tx_id] = dlq_r
++                            integrated_count += 1
++                    else:
++                        recovered_records[tx_id] = dlq_r
++                        integrated_count += 1
++    ref_audit = {"integrated_dlq_records": integrated_count, "discarded_duplicates": duplicate_count}
++    return list(recovered_records.values()), ref_audit
++
++
++def _projection(record):
++    obj = {}
++    for k in HASH_FIELDS:
++        if k == "temperature_c":
++            obj[k] = round(record["temperature_c"], 2)
++        else:
++            obj[k] = record[k]
++    return json.dumps(obj, separators=(",", ":"), sort_keys=True).encode("utf-8")
++
++
++def get_reference_consolidation(all_records):
++    all_records.sort(key=lambda x: (x.get("scanner_id", ""), x.get("sequence", 0), x.get("timestamp", 0)))
++    state = hashlib.sha256(CHAIN_INIT).digest()
++    for r in all_records:
++        state = hashlib.sha256(state + _projection(r)).digest()
++    root = state
++    n = len(all_records)
++    key = hashlib.sha256(SIG_PREFIX + str(n).encode("utf-8")).digest()
++    sig = hmac.new(key, root, hashlib.sha256).digest()
++    return all_records, root, sig
++
++
++def _load_config(config_file):
++    with open(config_file, "r") as fh:
++        return json.load(fh)
++
++
++def verify_stage1(output_dir, data_dir, config_file):
++    config = _load_config(config_file)
++    audit_path = os.path.join(output_dir, "audit_recovery.json")
++    if not os.path.exists(audit_path):
++        print("ERROR: audit_recovery.json not found")
++        return False
++    with open(audit_path, "r") as fh:
++        agent_audit = json.load(fh)
++    ref_audit, ref_records = get_reference_recovery(data_dir, config)
++    if agent_audit != ref_audit:
++        print(f"ERROR: Stage 1 audit mismatch. Expected {ref_audit}, got {agent_audit}")
++        return False
++    for s_id, expected_count in ref_audit.items():
++        agent_file = os.path.join(output_dir, f"recovered_{s_id}.json")
++        if not os.path.exists(agent_file):
++            print(f"ERROR: recovered_{s_id}.json not found")
++            return False
++        with open(agent_file, "r") as fh:
++            agent_records = json.load(fh)
++        if len(agent_records) != expected_count:
++            print(f"ERROR: Record count mismatch for {s_id}. Expected {expected_count}, got {len(agent_records)}")
++            return False
++        agent_txs = {r["transaction_id"]: r for r in agent_records}
++        ref_txs = {r["transaction_id"]: r for r in ref_records[s_id]}
++        if agent_txs.keys() != ref_txs.keys():
++            print(f"ERROR: Recovered transaction IDs mismatch for {s_id}")
++            return False
++        for tx_id, ref_r in ref_txs.items():
++            if agent_txs[tx_id] != ref_r:
++                print(f"ERROR: Recovered record content mismatch for {s_id}/{tx_id}. Expected {ref_r}, got {agent_txs[tx_id]}")
++                return False
++    print("STAGE 1 OK")
++    return True
++
++
++def verify_stage2(output_dir, metrics_file, config_file):
++    config = _load_config(config_file)
++    ref_agg = get_reference_aggregation(metrics_file, config)
++    agent_agg_file = os.path.join(output_dir, "aggregated_metrics.json")
++    if not os.path.exists(agent_agg_file):
++        print("ERROR: aggregated_metrics.json not found")
++        return False
++    with open(agent_agg_file, "r") as fh:
++        agent_agg = json.load(fh)
++    if len(agent_agg) != len(ref_agg):
++        print(f"ERROR: Metric counts mismatch. Expected {len(ref_agg)}, got {len(agent_agg)}")
++        return False
++    for a_m, r_m in zip(agent_agg, ref_agg):
++        if a_m["metric_name"] != r_m["metric_name"] or a_m["timestamp"] != r_m["timestamp"]:
++            print("ERROR: Mismatch in metric names or timestamps")
++            return False
++        if abs(a_m["value"] - r_m["value"]) > 1e-3:
++            print(f"ERROR: Value mismatch. Expected {r_m['value']}, got {a_m['value']}")
++            return False
++        if a_m["attributes"] != r_m["attributes"]:
++            print("ERROR: Attribute filter mismatch")
++            return False
++    print("STAGE 2 OK")
++    return True
++
++
++def verify_stage3(output_dir, data_dir, dlq_dir, config_file):
++    config = _load_config(config_file)
++    _, ref_records = get_reference_recovery(data_dir, config)
++    _, ref_audit = get_reference_replay(ref_records, dlq_dir, config)
++    agent_audit_file = os.path.join(output_dir, "audit_replay.json")
++    if not os.path.exists(agent_audit_file):
++        print("ERROR: audit_replay.json not found")
++        return False
++    with open(agent_audit_file, "r") as fh:
++        agent_audit = json.load(fh)
++    if agent_audit != ref_audit:
++        print(f"ERROR: Stage 3 audit mismatch. Expected {ref_audit}, got {agent_audit}")
++        return False
++    print("STAGE 3 OK")
++    return True
++
++
++def verify_stage4_and_checksum(output_dir, data_dir, dlq_dir, config_file):
++    config = _load_config(config_file)
++    _, ref_records_by_scanner = get_reference_recovery(data_dir, config)
++    ref_all_records, _ = get_reference_replay(ref_records_by_scanner, dlq_dir, config)
++    ref_consolidated, ref_root, ref_sig = get_reference_consolidation(ref_all_records)
++    agent_ledger_file = os.path.join(output_dir, "consolidated_ledger.json")
++    agent_root_file = os.path.join(output_dir, "ledger_root.bin")
++    agent_sig_file = os.path.join(output_dir, "ledger_signature.bin")
++    for p, label in [(agent_ledger_file, "consolidated_ledger.json"),
++                     (agent_root_file, "ledger_root.bin"),
++                     (agent_sig_file, "ledger_signature.bin")]:
++        if not os.path.exists(p):
++            print(f"ERROR: {label} not found")
++            return False
++    with open(agent_ledger_file, "r") as fh:
++        agent_ledger = json.load(fh)
++    with open(agent_root_file, "rb") as fh:
++        agent_root = fh.read()
++    with open(agent_sig_file, "rb") as fh:
++        agent_sig = fh.read()
++    if len(agent_ledger) != len(ref_consolidated):
++        print(f"ERROR: Consolidated ledger size mismatch. Expected {len(ref_consolidated)}, got {len(agent_ledger)}")
++        return False
++    for i, (a_r, r_r) in enumerate(zip(agent_ledger, ref_consolidated)):
++        if a_r != r_r:
++            print(f"ERROR: Record mismatch at index {i}. Expected {r_r}, got {a_r}")
++            return False
++    if agent_root != ref_root:
++        print(f"ERROR: Chain root mismatch. Expected {ref_root.hex()}, got {agent_root.hex()}")
++        return False
++    if agent_sig != ref_sig:
++        print(f"ERROR: Signature mismatch. Expected {ref_sig.hex()}, got {agent_sig.hex()}")
++        return False
++    print("STAGE 4 AND CHECKSUM OK")
++    return True
++
++
++def verify_mutated_run(workspace_dir):
++    raw_dir = os.path.join(workspace_dir, "data/raw_mutated")
++    proc_dir = os.path.join(workspace_dir, "data/processed_mutated")
++    config_file = os.path.join(workspace_dir, "config/pipeline_config.json")
++    metrics_file = os.path.join(raw_dir, "metrics.cctf")
++    dlq_dir = os.path.join(raw_dir, "dlq")
++    gen = os.path.join(os.path.dirname(os.path.abspath(__file__)), "generate_test_data.py")
++    cmd_gen = f"python3 {gen} --data-dir {raw_dir} --seed 99"
++    res_gen = subprocess.run(cmd_gen, shell=True, capture_output=True, text=True)
++    if res_gen.returncode != 0:
++        print(f"ERROR: Mutation generator failed: {res_gen.stderr}")
++        return False
++    cmd_pipe = (f"python3 {workspace_dir}/recon_pipeline.py --config {config_file} "
++                f"--data-dir {raw_dir} --dlq-dir {dlq_dir} --metrics-file {metrics_file} --output-dir {proc_dir}")
++    res_pipe = subprocess.run(cmd_pipe, shell=True, capture_output=True, text=True)
++    if res_pipe.returncode != 0:
++        print(f"ERROR: Agent's pipeline failed on mutated data: {res_pipe.stderr}")
++        return False
++    if not verify_stage1(proc_dir, raw_dir, config_file):
++        return False
++    if not verify_stage2(proc_dir, metrics_file, config_file):
++        return False
++    if not verify_stage3(proc_dir, raw_dir, dlq_dir, config_file):
++        return False
++    if not verify_stage4_and_checksum(proc_dir, raw_dir, dlq_dir, config_file):
++        return False
++    print("MUTATED RUN OK")
++    return True
++
++
++def verify_anti_shortcut(workspace_dir):
++    stages_dir = os.path.join(workspace_dir, "stages")
++    targets = []
++    for root, dirs, files in os.walk(stages_dir):
++        for f in files:
++            if f.endswith(".py"):
++                targets.append(os.path.join(root, f))
++    pipeline = os.path.join(workspace_dir, "recon_pipeline.py")
++    if os.path.exists(pipeline):
++        targets.append(pipeline)
++    for path in targets:
++        with open(path, "r", errors="ignore") as fh:
++            content = fh.read()
++        if re.search(r'["\'][0-9a-fA-F]{64}["\']', content):
++            print(f"ERROR: Hardcoded 64-hex digest literal detected in {os.path.basename(path)}!")
++            return False
++        if re.search(r'\\x[0-9a-fA-F]{2}(\\x[0-9a-fA-F]{2}){15,}', content):
++            print(f"ERROR: Hardcoded raw byte digest literal detected in {os.path.basename(path)}!")
++            return False
++    print("ANTI-SHORTCUT OK")
++    return True
++
++
++def main():
++    import argparse
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--stage", type=int)
++    parser.add_argument("--mutated", action="store_true")
++    parser.add_argument("--anti-shortcut", action="store_true")
++    args = parser.parse_args()
++    workspace = "/workspace/coldchain-recon"
++    data_dir = os.path.join(workspace, "data/raw")
++    dlq_dir = os.path.join(workspace, "data/raw/dlq")
++    metrics_file = os.path.join(workspace, "data/raw/metrics.cctf")
++    output_dir = os.path.join(workspace, "data/processed")
++    config_file = os.path.join(workspace, "config/pipeline_config.json")
++    if args.stage == 1:
++        sys.exit(0 if verify_stage1(output_dir, data_dir, config_file) else 1)
++    elif args.stage == 2:
++        sys.exit(0 if verify_stage2(output_dir, metrics_file, config_file) else 1)
++    elif args.stage == 3:
++        sys.exit(0 if verify_stage3(output_dir, data_dir, dlq_dir, config_file) else 1)
++    elif args.stage == 4:
++        sys.exit(0 if verify_stage4_and_checksum(output_dir, data_dir, dlq_dir, config_file) else 1)
++    elif args.mutated:
++        sys.exit(0 if verify_mutated_run(workspace) else 1)
++    elif args.anti_shortcut:
++        sys.exit(0 if verify_anti_shortcut(workspace) else 1)
++    else:
++        print("No action specified")
++        sys.exit(1)
++
++
++if __name__ == "__main__":
++    main()
