@@ -1,0 +1,145 @@
+{
+    "id": "47457fbb-f2b3-4ce2-9497-868cce4b64b7",
+    "task_name": "coldchain-reconciliation-pipeline-bf770ffb",
+    "trial_name": "coldchain-reconciliation-pipelin__YEGSznw",
+    "trial_uri": "file:///work/.harbor-scratch/coldchain-reconciliation-pipeline-bf770ffb/jobs/2026-09-16__05-56-53/coldchain-reconciliation-pipelin__YEGSznw",
+    "task_id": {
+        "path": "/__modal/volumes/vo-RvMGBCFd2yaZZR6HWopTZK/projects/coldchain-reconciliation-pipeline-bf770ffb"
+    },
+    "source": null,
+    "task_checksum": "d197b4c2a9b346000fa9aeaa780125990de41e9c5394e9ac329202b5911b8c53",
+    "config": {
+        "task": {
+            "path": "/__modal/volumes/vo-RvMGBCFd2yaZZR6HWopTZK/projects/coldchain-reconciliation-pipeline-bf770ffb",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "coldchain-reconciliation-pipelin__YEGSznw",
+        "trials_dir": "jobs/2026-09-16__05-56-53",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "terminus-2",
+            "import_path": null,
+            "model_name": "anthropic/claude-opus-4-8",
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {
+                "parser_name": "xml",
+                "llm_call_kwargs": {
+                    "max_tokens": 4096
+                }
+            },
+            "mcp_servers": []
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [
+                "/work/pipeline/overlay-oracle.yaml"
+            ],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [
+            "/work/pipeline/response-size-guidance.txt"
+        ],
+        "job_id": "d1f1a148-ed1d-4e5a-96c8-9714acf2d2f2",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "terminus-2",
+        "version": "2.0.0",
+        "model_info": {
+            "name": "claude-opus-4-8",
+            "provider": "anthropic"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 276429,
+        "n_cache_tokens": 249405,
+        "n_output_tokens": 8662,
+        "cost_usd": 0.51013125,
+        "rollout_details": [],
+        "metadata": {
+            "n_episodes": 16,
+            "api_request_times_msec": [
+                3422.775983810425,
+                3497.6892471313477,
+                4553.711652755737,
+                5288.002014160156,
+                17231.89377784729,
+                9972.4702835083,
+                8231.639385223389,
+                7348.654747009277,
+                7680.326700210571,
+                8685.559034347534,
+                7322.371959686279,
+                4632.473468780518,
+                6525.1452922821045,
+                5651.41749382019,
+                6873.132705688477,
+                5574.203014373779
+            ],
+            "summarization_count": 0
+        }
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.0
+        }
+    },
+    "verifier_environment_mode": "shared",
+    "exception_info": null,
+    "started_at": "2026-09-16T05:56:57.985127Z",
+    "finished_at": "2026-09-16T05:59:15.154968Z",
+    "environment_setup": {
+        "started_at": "2026-09-16T05:56:58.022853Z",
+        "finished_at": "2026-09-16T05:56:59.003459Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-09-16T05:56:59.003507Z",
+        "finished_at": "2026-09-16T05:57:00.637396Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-09-16T05:57:00.637505Z",
+        "finished_at": "2026-09-16T05:59:03.314052Z"
+    },
+    "verifier": {
+        "started_at": "2026-09-16T05:59:03.907981Z",
+        "finished_at": "2026-09-16T05:59:04.717806Z"
+    },
+    "step_results": null
+}

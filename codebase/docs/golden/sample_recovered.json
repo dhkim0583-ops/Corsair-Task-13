@@ -1,0 +1,29 @@
+[
+  {
+    "transaction_id": "tx_g_001",
+    "scanner_id": "scan_g",
+    "sequence": 1,
+    "timestamp": 1717200010,
+    "battery_level": 98,
+    "fw": "fw_3.1.0",
+    "temperature_c": -18.3
+  },
+  {
+    "transaction_id": "tx_g_002",
+    "scanner_id": "scan_g",
+    "sequence": 2,
+    "timestamp": 1717200020,
+    "battery_level": 97,
+    "fw": "fw_3.1.0",
+    "temperature_c": -17.9
+  },
+  {
+    "transaction_id": "tx_g_004",
+    "scanner_id": "scan_g",
+    "sequence": 4,
+    "timestamp": 1717200040,
+    "battery_level": 95,
+    "fw": "fw_3.1.0",
+    "temperature_c": -15.2
+  }
+]

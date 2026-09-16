@@ -1,0 +1,47 @@
+{
+  "kind": "image-diff",
+  "script_version": "4",
+  "root": "/",
+  "baseline": {
+    "version": "4",
+    "generated_at": "2026-09-16T05:56:51Z",
+    "files": 9998,
+    "pristine_copies": 89,
+    "pristine_bytes": 283359,
+    "package_db": "dpkg"
+  },
+  "counts": {
+    "added": 13,
+    "modified": 5,
+    "deleted": 0,
+    "unchanged": 9993,
+    "walked": 10011,
+    "baseline_now_excluded": 0,
+    "under_unreadable_dirs": 0
+  },
+  "rehashed": 2,
+  "unreadable_dir_count": 0,
+  "patch": {
+    "stanzas": 16,
+    "bytes": 87200,
+    "empty": false
+  },
+  "not_rendered": [
+    {
+      "status": "A",
+      "path": "workspace/coldchain-recon/data/processed/ledger_root.bin",
+      "size": 32,
+      "reason": "binary"
+    },
+    {
+      "status": "A",
+      "path": "workspace/coldchain-recon/data/processed/ledger_signature.bin",
+      "size": 32,
+      "reason": "binary"
+    }
+  ],
+  "notes": [],
+  "version_mismatch": null,
+  "collect_sec": 0.14,
+  "unreadable_dirs": []
+}

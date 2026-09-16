@@ -1,0 +1,63 @@
+============================= test session starts ==============================
+collecting ... collected 8 items
+
+test_outputs.py::test_check_1 PASSED
+test_outputs.py::test_check_2 PASSED
+test_outputs.py::test_check_3 PASSED
+test_outputs.py::test_check_4 PASSED
+test_outputs.py::test_check_5 PASSED
+test_outputs.py::test_check_6 PASSED
+test_outputs.py::test_check_7 FAILED
+test_outputs.py::test_check_8 FAILED
+
+=================================== FAILURES ===================================
+_________________________________ test_check_7 _________________________________
+
+    def test_check_7():
+        """Orchestrator runs all four stages end to end and exits 0"""
+        result = _run('python3 /workspace/coldchain-recon/recon_pipeline.py')
+>       assert result.returncode == 0, (
+            f"Command failed (exit {result.returncode}): orchestrator end-to-end run\n"
+            f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+E       AssertionError: Command failed (exit 1): orchestrator end-to-end run
+E         stdout: 
+E         stderr: Traceback (most recent call last):
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 59, in <module>
+E             main()
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 25, in main
+E             with open(args.config, "r", encoding="utf-8") as f:
+E                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E         FileNotFoundError: [Errno 2] No such file or directory: 'config/pipeline_config.json'
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args='python3 /workspace/coldchain-recon/recon_pipeline.py', returncode=1, stdout='', stderr='Traceback (most recent call last):\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 59, in <module>\n    main()\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 25, in main\n    with open(args.config, "r", encoding="utf-8") as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: \'config/pipeline_config.json\'\n').returncode
+
+test_outputs.py:77: AssertionError
+_________________________________ test_check_8 _________________________________
+
+    def test_check_8():
+        """Idempotence: a second successive run still reproduces the sealed ledger and signature"""
+        result = _run('python3 /workspace/coldchain-recon/recon_pipeline.py && python3 /tests/verify.py --stage 4')
+        output = result.stdout + result.stderr
+>       assert 'STAGE 4 AND CHECKSUM OK' in output, (
+            f"Expected substring not found for: idempotence rerun\n"
+            f"Expected: 'STAGE 4 AND CHECKSUM OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: idempotence rerun
+E         Expected: 'STAGE 4 AND CHECKSUM OK'
+E         Output: Traceback (most recent call last):
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 59, in <module>
+E             main()
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 25, in main
+E             with open(args.config, "r", encoding="utf-8") as f:
+E                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E         FileNotFoundError: [Errno 2] No such file or directory: 'config/pipeline_config.json'
+E         
+E       assert 'STAGE 4 AND CHECKSUM OK' in 'Traceback (most recent call last):\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 59, in <module>\n    main()\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 25, in main\n    with open(args.config, "r", encoding="utf-8") as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: \'config/pipeline_config.json\'\n'
+
+test_outputs.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED test_outputs.py::test_check_7 - AssertionError: Command failed (exit 1...
+FAILED test_outputs.py::test_check_8 - AssertionError: Expected substring not...
+========================= 2 failed, 6 passed in 0.42s ==========================

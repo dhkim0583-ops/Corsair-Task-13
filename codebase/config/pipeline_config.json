@@ -1,0 +1,12 @@
+{
+  "metric_config": {
+    "whitelisted_attributes": ["warehouse_id", "zone_id", "metric_name"],
+    "aggregation_interval_hours": 1
+  },
+  "lock_timeout_sec": 60,
+  "schema_versions": {
+    "1": {"temperature_field": "temp", "scale": "celsius"},
+    "2": {"temperature_field": "temperature_c", "scale": "celsius"},
+    "3": {"temperature_field": "temp_dc", "scale": "deci_celsius"}
+  }
+}

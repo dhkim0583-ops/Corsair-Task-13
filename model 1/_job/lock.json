@@ -1,0 +1,82 @@
+{
+    "schema_version": 3,
+    "created_at": "2026-09-16T05:56:55.976663Z",
+    "harbor": {
+        "version": "0.21.0",
+        "is_editable": false
+    },
+    "n_concurrent_trials": 4,
+    "retry": {
+        "max_retries": 0,
+        "exclude_exceptions": [
+            "VerifierOutputParseError",
+            "ModelNotFoundError",
+            "ApiUsageLimitError",
+            "AgentAuthenticationError",
+            "AgentTimeoutError",
+            "RewardFileEmptyError",
+            "AgentSafetyRefusalError",
+            "RewardFileNotFoundError",
+            "VerifierTimeoutError"
+        ],
+        "wait_multiplier": 1.0,
+        "min_wait_sec": 1.0,
+        "max_wait_sec": 60.0
+    },
+    "trials": [
+        {
+            "schema_version": 2,
+            "task": {
+                "name": "coldchain-reconciliation-pipeline-bf770ffb",
+                "type": "local",
+                "digest": "sha256:28e82190dda36eee7dcd1575863d3698997743df7349f18a244f690513a36b60",
+                "path": "/__modal/volumes/vo-RvMGBCFd2yaZZR6HWopTZK/projects/coldchain-reconciliation-pipeline-bf770ffb"
+            },
+            "install_only": false,
+            "timeout_multiplier": 1.0,
+            "extra_instructions": [
+                {
+                    "path": "/work/pipeline/response-size-guidance.txt",
+                    "digest": "sha256:f93532cdb0faa3355dc0cfdea3d6f12faf65447f0ddecc1e4e0d0025b49f8f7f"
+                }
+            ],
+            "agent": {
+                "name": "terminus-2",
+                "model_name": "anthropic/claude-opus-4-8",
+                "skills": [],
+                "resume_trajectory": false,
+                "extra_allowed_hosts": [],
+                "kwargs": {
+                    "parser_name": "xml",
+                    "llm_call_kwargs": {
+                        "max_tokens": 4096
+                    }
+                },
+                "mcp_servers": []
+            },
+            "skills": [],
+            "environment": {
+                "type": "docker",
+                "force_build": false,
+                "delete": true,
+                "cpu_enforcement_policy": "auto",
+                "memory_enforcement_policy": "auto",
+                "extra_docker_compose": [
+                    "/work/pipeline/overlay-oracle.yaml"
+                ],
+                "kwargs": {},
+                "extra_allowed_hosts": []
+            },
+            "extra_docker_compose": [
+                {
+                    "path": "/work/pipeline/overlay-oracle.yaml",
+                    "digest": "sha256:612e08afbf8f78e21163f1f846b55d1132d4100d900bac1263bc163a76584f05"
+                }
+            ],
+            "verifier": {
+                "disable": false,
+                "environment_mode": "shared"
+            }
+        }
+    ]
+}

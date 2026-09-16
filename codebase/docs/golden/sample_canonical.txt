@@ -1,0 +1,3 @@
+{"scanner_id":"scan_g","sequence":1,"temperature_c":-18.3,"timestamp":1717200010,"transaction_id":"tx_g_001"}
+{"scanner_id":"scan_g","sequence":2,"temperature_c":-17.9,"timestamp":1717200020,"transaction_id":"tx_g_002"}
+{"scanner_id":"scan_g","sequence":4,"temperature_c":-15.2,"timestamp":1717200040,"transaction_id":"tx_g_004"}

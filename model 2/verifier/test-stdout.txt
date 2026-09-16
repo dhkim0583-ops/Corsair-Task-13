@@ -1,0 +1,160 @@
+============================= test session starts ==============================
+collecting ... collected 8 items
+
+test_outputs.py::test_check_1 FAILED
+test_outputs.py::test_check_2 FAILED
+test_outputs.py::test_check_3 FAILED
+test_outputs.py::test_check_4 FAILED
+test_outputs.py::test_check_5 FAILED
+test_outputs.py::test_check_6 PASSED
+test_outputs.py::test_check_7 FAILED
+test_outputs.py::test_check_8 FAILED
+
+=================================== FAILURES ===================================
+_________________________________ test_check_1 _________________________________
+
+    def test_check_1():
+        """Stage 1: CCTF decode, CRC/truncation boundary, commit/rollback, schema migration, rename-gap merge"""
+        result = _run('python3 /tests/verify.py --stage 1')
+        output = result.stdout + result.stderr
+>       assert 'STAGE 1 OK' in output, (
+            f"Expected substring not found for: Stage 1 recovery\n"
+            f"Expected: 'STAGE 1 OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: Stage 1 recovery
+E         Expected: 'STAGE 1 OK'
+E         Output: ERROR: Stage 1 audit mismatch. Expected {'scan_002': 25, 'scan_006': 4, 'scan_003': 20, 'scan_004': 12, 'scan_005': 30, 'scan_001': 42}, got {'files_processed': 7, 'frames_recovered': 148}
+E         
+E       assert 'STAGE 1 OK' in "ERROR: Stage 1 audit mismatch. Expected {'scan_002': 25, 'scan_006': 4, 'scan_003': 20, 'scan_004': 12, 'scan_005': 30, 'scan_001': 42}, got {'files_processed': 7, 'frames_recovered': 148}\n"
+
+test_outputs.py:18: AssertionError
+_________________________________ test_check_2 _________________________________
+
+    def test_check_2():
+        """Stage 2: metric-frame decode, whitelist filter, hourly aggregation"""
+        result = _run('python3 /tests/verify.py --stage 2')
+        output = result.stdout + result.stderr
+>       assert 'STAGE 2 OK' in output, (
+            f"Expected substring not found for: Stage 2 aggregation\n"
+            f"Expected: 'STAGE 2 OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: Stage 2 aggregation
+E         Expected: 'STAGE 2 OK'
+E         Output: ERROR: aggregated_metrics.json not found
+E         
+E       assert 'STAGE 2 OK' in 'ERROR: aggregated_metrics.json not found\n'
+
+test_outputs.py:28: AssertionError
+_________________________________ test_check_3 _________________________________
+
+    def test_check_3():
+        """Stage 3: DLQ replay duplicate vs lineage-correction within/beyond lock timeout"""
+        result = _run('python3 /tests/verify.py --stage 3')
+        output = result.stdout + result.stderr
+>       assert 'STAGE 3 OK' in output, (
+            f"Expected substring not found for: Stage 3 DLQ replay\n"
+            f"Expected: 'STAGE 3 OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: Stage 3 DLQ replay
+E         Expected: 'STAGE 3 OK'
+E         Output: ERROR: audit_replay.json not found
+E         
+E       assert 'STAGE 3 OK' in 'ERROR: audit_replay.json not found\n'
+
+test_outputs.py:38: AssertionError
+_________________________________ test_check_4 _________________________________
+
+    def test_check_4():
+        """Stage 4: canonical sort, chained SHA-256 root, and count-derived HMAC signature"""
+        result = _run('python3 /tests/verify.py --stage 4')
+        output = result.stdout + result.stderr
+>       assert 'STAGE 4 AND CHECKSUM OK' in output, (
+            f"Expected substring not found for: Stage 4 consolidation/checksum\n"
+            f"Expected: 'STAGE 4 AND CHECKSUM OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: Stage 4 consolidation/checksum
+E         Expected: 'STAGE 4 AND CHECKSUM OK'
+E         Output: ERROR: consolidated_ledger.json not found
+E         
+E       assert 'STAGE 4 AND CHECKSUM OK' in 'ERROR: consolidated_ledger.json not found\n'
+
+test_outputs.py:48: AssertionError
+_________________________________ test_check_5 _________________________________
+
+    def test_check_5():
+        """Resilience: re-run the pipeline against freshly generated, randomized inputs"""
+        result = _run('python3 /tests/verify.py --mutated')
+        output = result.stdout + result.stderr
+>       assert 'MUTATED RUN OK' in output, (
+            f"Expected substring not found for: mutated-data run\n"
+            f"Expected: 'MUTATED RUN OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: mutated-data run
+E         Expected: 'MUTATED RUN OK'
+E         Output: ERROR: Agent's pipeline failed on mutated data: Traceback (most recent call last):
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 49, in <module>
+E             main()
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 33, in main
+E             aggregate_metrics(args.metrics_file, config, args.output_dir)
+E           File "/workspace/coldchain-recon/stages/aggregation.py", line 19, in aggregate_metrics
+E             recovered = recover_ledgers(os.path.join(tmpdir, "data"), tmpdir, config)
+E                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/coldchain-recon/stages/recov
+E       assert 'MUTATED RUN OK' in 'ERROR: Agent\'s pipeline failed on mutated data: Traceback (most recent call last):\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 49, in <module>\n    main()\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 33, in main\n    aggregate_metrics(args.metrics_file, config, args.output_dir)\n  File "/workspace/coldchain-recon/stages/aggregation.py", line 19, in aggregate_metrics\n    recovered = recover_ledgers(os.path.join(tmpdir, "data"), tmpdir, config)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/coldchain-recon/stages/recovery.py", line 15, in recover_ledgers\n    scanner_id = filename.split(\'_\')[2].split(\'.\')[0]\n                 ~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n\n'
+
+test_outputs.py:58: AssertionError
+_________________________________ test_check_7 _________________________________
+
+    def test_check_7():
+        """Orchestrator runs all four stages end to end and exits 0"""
+        result = _run('python3 /workspace/coldchain-recon/recon_pipeline.py')
+>       assert result.returncode == 0, (
+            f"Command failed (exit {result.returncode}): orchestrator end-to-end run\n"
+            f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+E       AssertionError: Command failed (exit 1): orchestrator end-to-end run
+E         stdout: 
+E         stderr: Traceback (most recent call last):
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 49, in <module>
+E             main()
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 23, in main
+E             with open(args.config, "r") as f:
+E                  ^^^^^^^^^^^^^^^^^^^^^^
+E         FileNotFoundError: [Errno 2] No such file or directory: 'config/pipeline_config.json'
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args='python3 /workspace/coldchain-recon/recon_pipeline.py', returncode=1, stdout='', stderr='Traceback (most recent call last):\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 49, in <module>\n    main()\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 23, in main\n    with open(args.config, "r") as f:\n         ^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: \'config/pipeline_config.json\'\n').returncode
+
+test_outputs.py:77: AssertionError
+_________________________________ test_check_8 _________________________________
+
+    def test_check_8():
+        """Idempotence: a second successive run still reproduces the sealed ledger and signature"""
+        result = _run('python3 /workspace/coldchain-recon/recon_pipeline.py && python3 /tests/verify.py --stage 4')
+        output = result.stdout + result.stderr
+>       assert 'STAGE 4 AND CHECKSUM OK' in output, (
+            f"Expected substring not found for: idempotence rerun\n"
+            f"Expected: 'STAGE 4 AND CHECKSUM OK'\nOutput: {output[:600]}"
+        )
+E       AssertionError: Expected substring not found for: idempotence rerun
+E         Expected: 'STAGE 4 AND CHECKSUM OK'
+E         Output: Traceback (most recent call last):
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 49, in <module>
+E             main()
+E           File "/workspace/coldchain-recon/recon_pipeline.py", line 23, in main
+E             with open(args.config, "r") as f:
+E                  ^^^^^^^^^^^^^^^^^^^^^^
+E         FileNotFoundError: [Errno 2] No such file or directory: 'config/pipeline_config.json'
+E         
+E       assert 'STAGE 4 AND CHECKSUM OK' in 'Traceback (most recent call last):\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 49, in <module>\n    main()\n  File "/workspace/coldchain-recon/recon_pipeline.py", line 23, in main\n    with open(args.config, "r") as f:\n         ^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: \'config/pipeline_config.json\'\n'
+
+test_outputs.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED test_outputs.py::test_check_1 - AssertionError: Expected substring not...
+FAILED test_outputs.py::test_check_2 - AssertionError: Expected substring not...
+FAILED test_outputs.py::test_check_3 - AssertionError: Expected substring not...
+FAILED test_outputs.py::test_check_4 - AssertionError: Expected substring not...
+FAILED test_outputs.py::test_check_5 - AssertionError: Expected substring not...
+FAILED test_outputs.py::test_check_7 - AssertionError: Command failed (exit 1...
+FAILED test_outputs.py::test_check_8 - AssertionError: Expected substring not...
+========================= 7 failed, 1 passed in 0.40s ==========================

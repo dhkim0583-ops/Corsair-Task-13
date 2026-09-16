@@ -1,0 +1,1605 @@
+# This diff was produced by differencing the container against a manifest of the
+# pristine image, not by guessing where the agent worked. Baseline: 9998 file(s)
+# recorded at 2026-09-16T05:56:51Z by harbor_capture 4.
+# 7 added, 5 modified, 0 deleted, 9993 unchanged, 10005 path(s) walked.
+# Excluded from the comparison entirely: the container runtime's own .dockerenv, /etc/{hostname,hosts,resolv.conf,mtab}; site-packages, dist-packages, node_modules, vendor, virtualenvs; __pycache__ and *.pyc; .git; package and tool caches; shell and tool history; apt/dpkg logs; /proc /sys /dev /run /tmp /var/tmp; harbor's own /logs /tests /solution /agent.
+#
+diff --git a/workspace/coldchain-recon/data/processed/audit_recovery.json b/workspace/coldchain-recon/data/processed/audit_recovery.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/audit_recovery.json
+@@ -0,0 +1,4 @@
++{
++  "files_processed": 7,
++  "frames_recovered": 148
++}
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/data/processed/recovered_001.json b/workspace/coldchain-recon/data/processed/recovered_001.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/recovered_001.json
+@@ -0,0 +1,422 @@
++[
++  {
++    "transaction_id": "tx_scan_001_001",
++    "scanner_id": "001",
++    "sequence": 1,
++    "timestamp": 1717200136,
++    "temp_dc": -195,
++    "battery_level": 99,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.5
++  },
++  {
++    "transaction_id": "tx_scan_001_002",
++    "scanner_id": "001",
++    "sequence": 2,
++    "timestamp": 1717200146,
++    "temp_dc": -190,
++    "battery_level": 98,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.0
++  },
++  {
++    "transaction_id": "tx_scan_001_003",
++    "scanner_id": "001",
++    "sequence": 3,
++    "timestamp": 1717200156,
++    "temp_dc": -185,
++    "battery_level": 97,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.5
++  },
++  {
++    "transaction_id": "tx_scan_001_004",
++    "scanner_id": "001",
++    "sequence": 4,
++    "timestamp": 1717200166,
++    "temp_dc": -180,
++    "battery_level": 96,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.0
++  },
++  {
++    "transaction_id": "tx_scan_001_005",
++    "scanner_id": "001",
++    "sequence": 5,
++    "timestamp": 1717200176,
++    "temp_dc": -175,
++    "battery_level": 95,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.5
++  },
++  {
++    "transaction_id": "tx_scan_001_006",
++    "scanner_id": "001",
++    "sequence": 6,
++    "timestamp": 1717200186,
++    "temp_dc": -170,
++    "battery_level": 94,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.0
++  },
++  {
++    "transaction_id": "tx_scan_001_007",
++    "scanner_id": "001",
++    "sequence": 7,
++    "timestamp": 1717200196,
++    "temp_dc": -165,
++    "battery_level": 93,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.5
++  },
++  {
++    "transaction_id": "tx_scan_001_008",
++    "scanner_id": "001",
++    "sequence": 8,
++    "timestamp": 1717200206,
++    "temp_dc": -160,
++    "battery_level": 92,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.0
++  },
++  {
++    "transaction_id": "tx_scan_001_009",
++    "scanner_id": "001",
++    "sequence": 9,
++    "timestamp": 1717200216,
++    "temp_dc": -155,
++    "battery_level": 91,
++    "fw": "fw_3.1.0",
++    "temperature_c": -15.5
++  },
++  {
++    "transaction_id": "tx_scan_001_010",
++    "scanner_id": "001",
++    "sequence": 10,
++    "timestamp": 1717200226,
++    "temp_dc": -200,
++    "battery_level": 90,
++    "fw": "fw_3.1.0",
++    "temperature_c": -20.0
++  },
++  {
++    "transaction_id": "tx_scan_001_011",
++    "scanner_id": "001",
++    "sequence": 11,
++    "timestamp": 1717200236,
++    "temp_dc": -195,
++    "battery_level": 89,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.5
++  },
++  {
++    "transaction_id": "tx_scan_001_012",
++    "scanner_id": "001",
++    "sequence": 12,
++    "timestamp": 1717200246,
++    "temp_dc": -190,
++    "battery_level": 88,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.0
++  },
++  {
++    "transaction_id": "tx_scan_001_013",
++    "scanner_id": "001",
++    "sequence": 13,
++    "timestamp": 1717200256,
++    "temp_dc": -185,
++    "battery_level": 87,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.5
++  },
++  {
++    "transaction_id": "tx_scan_001_014",
++    "scanner_id": "001",
++    "sequence": 14,
++    "timestamp": 1717200266,
++    "temp_dc": -180,
++    "battery_level": 86,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.0
++  },
++  {
++    "transaction_id": "tx_scan_001_015",
++    "scanner_id": "001",
++    "sequence": 15,
++    "timestamp": 1717200276,
++    "temp_dc": -175,
++    "battery_level": 85,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.5
++  },
++  {
++    "transaction_id": "tx_scan_001_016",
++    "scanner_id": "001",
++    "sequence": 16,
++    "timestamp": 1717200286,
++    "temp_dc": -170,
++    "battery_level": 84,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.0
++  },
++  {
++    "transaction_id": "tx_scan_001_017",
++    "scanner_id": "001",
++    "sequence": 17,
++    "timestamp": 1717200296,
++    "temp_dc": -165,
++    "battery_level": 83,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.5
++  },
++  {
++    "transaction_id": "tx_scan_001_018",
++    "scanner_id": "001",
++    "sequence": 18,
++    "timestamp": 1717200306,
++    "temp_dc": -160,
++    "battery_level": 82,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.0
++  },
++  {
++    "transaction_id": "tx_scan_001_019",
++    "scanner_id": "001",
++    "sequence": 19,
++    "timestamp": 1717200316,
++    "temp_dc": -155,
++    "battery_level": 81,
++    "fw": "fw_3.1.0",
++    "temperature_c": -15.5
++  },
++  {
++    "transaction_id": "tx_scan_001_020",
++    "scanner_id": "001",
++    "sequence": 20,
++    "timestamp": 1717200326,
++    "temp_dc": -200,
++    "battery_level": 80,
++    "fw": "fw_3.1.0",
++    "temperature_c": -20.0
++  },
++  {
++    "transaction_id": "tx_scan_001_021",
++    "scanner_id": "001",
++    "sequence": 21,
++    "timestamp": 1717200336,
++    "temp_dc": -195,
++    "battery_level": 79,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.5
++  },
++  {
++    "transaction_id": "tx_scan_001_022",
++    "scanner_id": "001",
++    "sequence": 22,
++    "timestamp": 1717200346,
++    "temp_dc": -190,
++    "battery_level": 78,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.0
++  },
++  {
++    "transaction_id": "tx_scan_001_023",
++    "scanner_id": "001",
++    "sequence": 23,
++    "timestamp": 1717200356,
++    "temp_dc": -185,
++    "battery_level": 77,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.5
++  },
++  {
++    "transaction_id": "tx_scan_001_024",
++    "scanner_id": "001",
++    "sequence": 24,
++    "timestamp": 1717200366,
++    "temp_dc": -180,
++    "battery_level": 76,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.0
++  },
++  {
++    "transaction_id": "tx_scan_001_025",
++    "scanner_id": "001",
++    "sequence": 25,
++    "timestamp": 1717200376,
++    "temp_dc": -175,
++    "battery_level": 75,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.5
++  },
++  {
++    "transaction_id": "tx_scan_001_026",
++    "scanner_id": "001",
++    "sequence": 26,
++    "timestamp": 1717200386,
++    "temp_dc": -170,
++    "battery_level": 74,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.0
++  },
++  {
++    "transaction_id": "tx_scan_001_027",
++    "scanner_id": "001",
++    "sequence": 27,
++    "timestamp": 1717200396,
++    "temp_dc": -165,
++    "battery_level": 73,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.5
++  },
++  {
++    "transaction_id": "tx_scan_001_028",
++    "scanner_id": "001",
++    "sequence": 28,
++    "timestamp": 1717200406,
++    "temp_dc": -160,
++    "battery_level": 72,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.0
++  },
++  {
++    "transaction_id": "tx_scan_001_029",
++    "scanner_id": "001",
++    "sequence": 29,
++    "timestamp": 1717200416,
++    "temp_dc": -155,
++    "battery_level": 71,
++    "fw": "fw_3.1.0",
++    "temperature_c": -15.5
++  },
++  {
++    "transaction_id": "tx_scan_001_030",
++    "scanner_id": "001",
++    "sequence": 30,
++    "timestamp": 1717200426,
++    "temp_dc": -200,
++    "battery_level": 70,
++    "fw": "fw_3.1.0",
++    "temperature_c": -20.0
++  },
++  {
++    "transaction_id": "tx_scan_001_031",
++    "scanner_id": "001",
++    "sequence": 31,
++    "timestamp": 1717200436,
++    "temp_dc": -195,
++    "battery_level": 69,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.5
++  },
++  {
++    "transaction_id": "tx_scan_001_032",
++    "scanner_id": "001",
++    "sequence": 32,
++    "timestamp": 1717200446,
++    "temp_dc": -190,
++    "battery_level": 68,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.0
++  },
++  {
++    "transaction_id": "tx_scan_001_033",
++    "scanner_id": "001",
++    "sequence": 33,
++    "timestamp": 1717200456,
++    "temp_dc": -185,
++    "battery_level": 67,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.5
++  },
++  {
++    "transaction_id": "tx_scan_001_034",
++    "scanner_id": "001",
++    "sequence": 34,
++    "timestamp": 1717200466,
++    "temp_dc": -180,
++    "battery_level": 66,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.0
++  },
++  {
++    "transaction_id": "tx_scan_001_035",
++    "scanner_id": "001",
++    "sequence": 35,
++    "timestamp": 1717200476,
++    "temp_dc": -175,
++    "battery_level": 65,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.5
++  },
++  {
++    "transaction_id": "tx_scan_001_036",
++    "scanner_id": "001",
++    "sequence": 36,
++    "timestamp": 1717200486,
++    "temp_dc": -170,
++    "battery_level": 64,
++    "fw": "fw_3.1.0",
++    "temperature_c": -17.0
++  },
++  {
++    "transaction_id": "tx_scan_001_037",
++    "scanner_id": "001",
++    "sequence": 37,
++    "timestamp": 1717200496,
++    "temp_dc": -165,
++    "battery_level": 63,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.5
++  },
++  {
++    "transaction_id": "tx_scan_001_038",
++    "scanner_id": "001",
++    "sequence": 38,
++    "timestamp": 1717200506,
++    "temp_dc": -160,
++    "battery_level": 62,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.0
++  },
++  {
++    "transaction_id": "tx_scan_001_039",
++    "scanner_id": "001",
++    "sequence": 39,
++    "timestamp": 1717200516,
++    "temp_dc": -155,
++    "battery_level": 61,
++    "fw": "fw_3.1.0",
++    "temperature_c": -15.5
++  },
++  {
++    "transaction_id": "tx_scan_001_040",
++    "scanner_id": "001",
++    "sequence": 40,
++    "timestamp": 1717200526,
++    "temp_dc": -200,
++    "battery_level": 60,
++    "fw": "fw_3.1.0",
++    "temperature_c": -20.0
++  },
++  {
++    "transaction_id": "tx_scan_001_041",
++    "scanner_id": "001",
++    "sequence": 41,
++    "timestamp": 1717200536,
++    "temp_dc": -195,
++    "battery_level": 59,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.5
++  },
++  {
++    "transaction_id": "tx_scan_001_042",
++    "scanner_id": "001",
++    "sequence": 42,
++    "timestamp": 1717200546,
++    "temp_dc": -190,
++    "battery_level": 58,
++    "fw": "fw_3.1.0",
++    "temperature_c": -19.0
++  }
++]
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/data/processed/recovered_002.json b/workspace/coldchain-recon/data/processed/recovered_002.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/recovered_002.json
+@@ -0,0 +1,227 @@
++[
++  {
++    "transaction_id": "tx_scan_002_001",
++    "scanner_id": "002",
++    "sequence": 1,
++    "timestamp": 1717200136,
++    "temperature_c": -19.2863,
++    "battery_level": 99,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_002",
++    "scanner_id": "002",
++    "sequence": 2,
++    "timestamp": 1717200146,
++    "temperature_c": -18.7726,
++    "battery_level": 98,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_003",
++    "scanner_id": "002",
++    "sequence": 3,
++    "timestamp": 1717200156,
++    "temperature_c": -18.2589,
++    "battery_level": 97,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_004",
++    "scanner_id": "002",
++    "sequence": 4,
++    "timestamp": 1717200166,
++    "temperature_c": -17.7452,
++    "battery_level": 96,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_005",
++    "scanner_id": "002",
++    "sequence": 5,
++    "timestamp": 1717200176,
++    "temperature_c": -17.2315,
++    "battery_level": 95,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_006",
++    "scanner_id": "002",
++    "sequence": 6,
++    "timestamp": 1717200186,
++    "temperature_c": -16.7178,
++    "battery_level": 94,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_007",
++    "scanner_id": "002",
++    "sequence": 7,
++    "timestamp": 1717200196,
++    "temperature_c": -16.2041,
++    "battery_level": 93,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_008",
++    "scanner_id": "002",
++    "sequence": 8,
++    "timestamp": 1717200206,
++    "temperature_c": -15.6904,
++    "battery_level": 92,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_009",
++    "scanner_id": "002",
++    "sequence": 9,
++    "timestamp": 1717200216,
++    "temperature_c": -15.1767,
++    "battery_level": 91,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_010",
++    "scanner_id": "002",
++    "sequence": 10,
++    "timestamp": 1717200226,
++    "temperature_c": -19.663,
++    "battery_level": 90,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_011",
++    "scanner_id": "002",
++    "sequence": 11,
++    "timestamp": 1717200236,
++    "temperature_c": -19.1493,
++    "battery_level": 89,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_012",
++    "scanner_id": "002",
++    "sequence": 12,
++    "timestamp": 1717200246,
++    "temperature_c": -18.6356,
++    "battery_level": 88,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_013",
++    "scanner_id": "002",
++    "sequence": 13,
++    "timestamp": 1717200256,
++    "temperature_c": -18.1219,
++    "battery_level": 87,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_014",
++    "scanner_id": "002",
++    "sequence": 14,
++    "timestamp": 1717200266,
++    "temperature_c": -17.6082,
++    "battery_level": 86,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_015",
++    "scanner_id": "002",
++    "sequence": 15,
++    "timestamp": 1717200276,
++    "temperature_c": -17.0945,
++    "battery_level": 85,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_016",
++    "scanner_id": "002",
++    "sequence": 16,
++    "timestamp": 1717200286,
++    "temperature_c": -16.5808,
++    "battery_level": 84,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_017",
++    "scanner_id": "002",
++    "sequence": 17,
++    "timestamp": 1717200296,
++    "temperature_c": -16.0671,
++    "battery_level": 83,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_018",
++    "scanner_id": "002",
++    "sequence": 18,
++    "timestamp": 1717200306,
++    "temperature_c": -15.5534,
++    "battery_level": 82,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_019",
++    "scanner_id": "002",
++    "sequence": 19,
++    "timestamp": 1717200316,
++    "temperature_c": -15.0397,
++    "battery_level": 81,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_020",
++    "scanner_id": "002",
++    "sequence": 20,
++    "timestamp": 1717200326,
++    "temperature_c": -19.526,
++    "battery_level": 80,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_021",
++    "scanner_id": "002",
++    "sequence": 21,
++    "timestamp": 1717200336,
++    "temperature_c": -19.0123,
++    "battery_level": 79,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_022",
++    "scanner_id": "002",
++    "sequence": 22,
++    "timestamp": 1717200346,
++    "temperature_c": -18.4986,
++    "battery_level": 78,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_023",
++    "scanner_id": "002",
++    "sequence": 23,
++    "timestamp": 1717200356,
++    "temperature_c": -17.9849,
++    "battery_level": 77,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_024",
++    "scanner_id": "002",
++    "sequence": 24,
++    "timestamp": 1717200366,
++    "temperature_c": -17.4712,
++    "battery_level": 76,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_002_025",
++    "scanner_id": "002",
++    "sequence": 25,
++    "timestamp": 1717200376,
++    "temperature_c": -16.9575,
++    "battery_level": 75,
++    "fw": "fw_2.3.1"
++  }
++]
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/data/processed/recovered_003.json b/workspace/coldchain-recon/data/processed/recovered_003.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/recovered_003.json
+@@ -0,0 +1,182 @@
++[
++  {
++    "transaction_id": "tx_scan_003_001",
++    "scanner_id": "003",
++    "sequence": 1,
++    "timestamp": 1717200141,
++    "temp": -19.0863,
++    "battery_level": 99,
++    "temperature_c": -19.0863
++  },
++  {
++    "transaction_id": "tx_scan_003_002",
++    "scanner_id": "003",
++    "sequence": 2,
++    "timestamp": 1717200151,
++    "temp": -18.5726,
++    "battery_level": 98,
++    "temperature_c": -18.5726
++  },
++  {
++    "transaction_id": "tx_scan_003_003",
++    "scanner_id": "003",
++    "sequence": 3,
++    "timestamp": 1717200161,
++    "temp": -18.0589,
++    "battery_level": 97,
++    "temperature_c": -18.0589
++  },
++  {
++    "transaction_id": "tx_scan_003_004",
++    "scanner_id": "003",
++    "sequence": 4,
++    "timestamp": 1717200171,
++    "temp": -17.5452,
++    "battery_level": 96,
++    "temperature_c": -17.5452
++  },
++  {
++    "transaction_id": "tx_scan_003_005",
++    "scanner_id": "003",
++    "sequence": 5,
++    "timestamp": 1717200181,
++    "temp": -17.0315,
++    "battery_level": 95,
++    "temperature_c": -17.0315
++  },
++  {
++    "transaction_id": "tx_scan_003_006",
++    "scanner_id": "003",
++    "sequence": 6,
++    "timestamp": 1717200191,
++    "temp": -16.5178,
++    "battery_level": 94,
++    "temperature_c": -16.5178
++  },
++  {
++    "transaction_id": "tx_scan_003_007",
++    "scanner_id": "003",
++    "sequence": 7,
++    "timestamp": 1717200201,
++    "temp": -16.0041,
++    "battery_level": 93,
++    "temperature_c": -16.0041
++  },
++  {
++    "transaction_id": "tx_scan_003_008",
++    "scanner_id": "003",
++    "sequence": 8,
++    "timestamp": 1717200211,
++    "temp": -15.4904,
++    "battery_level": 92,
++    "temperature_c": -15.4904
++  },
++  {
++    "transaction_id": "tx_scan_003_009",
++    "scanner_id": "003",
++    "sequence": 9,
++    "timestamp": 1717200221,
++    "temp": -14.9767,
++    "battery_level": 91,
++    "temperature_c": -14.9767
++  },
++  {
++    "transaction_id": "tx_scan_003_010",
++    "scanner_id": "003",
++    "sequence": 10,
++    "timestamp": 1717200231,
++    "temp": -19.463,
++    "battery_level": 90,
++    "temperature_c": -19.463
++  },
++  {
++    "transaction_id": "tx_scan_003_011",
++    "scanner_id": "003",
++    "sequence": 11,
++    "timestamp": 1717200241,
++    "temp": -18.9493,
++    "battery_level": 89,
++    "temperature_c": -18.9493
++  },
++  {
++    "transaction_id": "tx_scan_003_012",
++    "scanner_id": "003",
++    "sequence": 12,
++    "timestamp": 1717200251,
++    "temp": -18.4356,
++    "battery_level": 88,
++    "temperature_c": -18.4356
++  },
++  {
++    "transaction_id": "tx_scan_003_013",
++    "scanner_id": "003",
++    "sequence": 13,
++    "timestamp": 1717200261,
++    "temp": -17.9219,
++    "battery_level": 87,
++    "temperature_c": -17.9219
++  },
++  {
++    "transaction_id": "tx_scan_003_014",
++    "scanner_id": "003",
++    "sequence": 14,
++    "timestamp": 1717200271,
++    "temp": -17.4082,
++    "battery_level": 86,
++    "temperature_c": -17.4082
++  },
++  {
++    "transaction_id": "tx_scan_003_015",
++    "scanner_id": "003",
++    "sequence": 15,
++    "timestamp": 1717200281,
++    "temp": -16.8945,
++    "battery_level": 85,
++    "temperature_c": -16.8945
++  },
++  {
++    "transaction_id": "tx_scan_003_016",
++    "scanner_id": "003",
++    "sequence": 16,
++    "timestamp": 1717200291,
++    "temp": -16.3808,
++    "battery_level": 84,
++    "temperature_c": -16.3808
++  },
++  {
++    "transaction_id": "tx_scan_003_017",
++    "scanner_id": "003",
++    "sequence": 17,
++    "timestamp": 1717200301,
++    "temp": -15.8671,
++    "battery_level": 83,
++    "temperature_c": -15.8671
++  },
++  {
++    "transaction_id": "tx_scan_003_018",
++    "scanner_id": "003",
++    "sequence": 18,
++    "timestamp": 1717200311,
++    "temp": -15.3534,
++    "battery_level": 82,
++    "temperature_c": -15.3534
++  },
++  {
++    "transaction_id": "tx_scan_003_019",
++    "scanner_id": "003",
++    "sequence": 19,
++    "timestamp": 1717200321,
++    "temp": -14.8397,
++    "battery_level": 81,
++    "temperature_c": -14.8397
++  },
++  {
++    "transaction_id": "tx_scan_003_020",
++    "scanner_id": "003",
++    "sequence": 20,
++    "timestamp": 1717200331,
++    "temp": -19.326,
++    "battery_level": 80,
++    "temperature_c": -19.326
++  }
++]
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/data/processed/recovered_004.json b/workspace/coldchain-recon/data/processed/recovered_004.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/recovered_004.json
+@@ -0,0 +1,110 @@
++[
++  {
++    "transaction_id": "tx_scan_004_001",
++    "scanner_id": "004",
++    "sequence": 1,
++    "timestamp": 1717200136,
++    "temperature_c": -18.8863,
++    "battery_level": 99,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_002",
++    "scanner_id": "004",
++    "sequence": 2,
++    "timestamp": 1717200146,
++    "temperature_c": -18.3726,
++    "battery_level": 98,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_003",
++    "scanner_id": "004",
++    "sequence": 3,
++    "timestamp": 1717200156,
++    "temperature_c": -17.8589,
++    "battery_level": 97,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_004",
++    "scanner_id": "004",
++    "sequence": 4,
++    "timestamp": 1717200166,
++    "temperature_c": -17.3452,
++    "battery_level": 96,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_005",
++    "scanner_id": "004",
++    "sequence": 5,
++    "timestamp": 1717200176,
++    "temperature_c": -16.8315,
++    "battery_level": 95,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_006",
++    "scanner_id": "004",
++    "sequence": 6,
++    "timestamp": 1717200186,
++    "temperature_c": -16.3178,
++    "battery_level": 94,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_007",
++    "scanner_id": "004",
++    "sequence": 7,
++    "timestamp": 1717200196,
++    "temperature_c": -15.8041,
++    "battery_level": 93,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_008",
++    "scanner_id": "004",
++    "sequence": 8,
++    "timestamp": 1717200206,
++    "temperature_c": -15.2904,
++    "battery_level": 92,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_009",
++    "scanner_id": "004",
++    "sequence": 9,
++    "timestamp": 1717200216,
++    "temperature_c": -14.7767,
++    "battery_level": 91,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_010",
++    "scanner_id": "004",
++    "sequence": 10,
++    "timestamp": 1717200226,
++    "temperature_c": -19.263,
++    "battery_level": 90,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_011",
++    "scanner_id": "004",
++    "sequence": 11,
++    "timestamp": 1717200236,
++    "temperature_c": -18.7493,
++    "battery_level": 89,
++    "fw": "fw_2.3.1"
++  },
++  {
++    "transaction_id": "tx_scan_004_012",
++    "scanner_id": "004",
++    "sequence": 12,
++    "timestamp": 1717200246,
++    "temperature_c": -18.2356,
++    "battery_level": 88,
++    "fw": "fw_2.3.1"
++  }
++]
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/data/processed/recovered_005.json b/workspace/coldchain-recon/data/processed/recovered_005.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/recovered_005.json
+@@ -0,0 +1,272 @@
++[
++  {
++    "transaction_id": "tx_scan_005_001",
++    "scanner_id": "005",
++    "sequence": 1,
++    "timestamp": 1717200136,
++    "temp": -18.6863,
++    "battery_level": 99,
++    "temperature_c": -18.6863
++  },
++  {
++    "transaction_id": "tx_scan_005_002",
++    "scanner_id": "005",
++    "sequence": 2,
++    "timestamp": 1717200146,
++    "temp": -18.1726,
++    "battery_level": 98,
++    "temperature_c": -18.1726
++  },
++  {
++    "transaction_id": "tx_scan_005_003",
++    "scanner_id": "005",
++    "sequence": 3,
++    "timestamp": 1717200156,
++    "temp": -17.6589,
++    "battery_level": 97,
++    "temperature_c": -17.6589
++  },
++  {
++    "transaction_id": "tx_scan_005_004",
++    "scanner_id": "005",
++    "sequence": 4,
++    "timestamp": 1717200166,
++    "temp": -17.1452,
++    "battery_level": 96,
++    "temperature_c": -17.1452
++  },
++  {
++    "transaction_id": "tx_scan_005_005",
++    "scanner_id": "005",
++    "sequence": 5,
++    "timestamp": 1717200176,
++    "temp": -16.6315,
++    "battery_level": 95,
++    "temperature_c": -16.6315
++  },
++  {
++    "transaction_id": "tx_scan_005_006",
++    "scanner_id": "005",
++    "sequence": 6,
++    "timestamp": 1717200186,
++    "temp": -16.1178,
++    "battery_level": 94,
++    "temperature_c": -16.1178
++  },
++  {
++    "transaction_id": "tx_scan_005_007",
++    "scanner_id": "005",
++    "sequence": 7,
++    "timestamp": 1717200196,
++    "temp": -15.6041,
++    "battery_level": 93,
++    "temperature_c": -15.6041
++  },
++  {
++    "transaction_id": "tx_scan_005_008",
++    "scanner_id": "005",
++    "sequence": 8,
++    "timestamp": 1717200206,
++    "temp": -15.0904,
++    "battery_level": 92,
++    "temperature_c": -15.0904
++  },
++  {
++    "transaction_id": "tx_scan_005_009",
++    "scanner_id": "005",
++    "sequence": 9,
++    "timestamp": 1717200216,
++    "temp": -14.5767,
++    "battery_level": 91,
++    "temperature_c": -14.5767
++  },
++  {
++    "transaction_id": "tx_scan_005_010",
++    "scanner_id": "005",
++    "sequence": 10,
++    "timestamp": 1717200226,
++    "temp": -19.063,
++    "battery_level": 90,
++    "temperature_c": -19.063
++  },
++  {
++    "transaction_id": "tx_scan_005_011",
++    "scanner_id": "005",
++    "sequence": 11,
++    "timestamp": 1717200236,
++    "temp": -18.5493,
++    "battery_level": 89,
++    "temperature_c": -18.5493
++  },
++  {
++    "transaction_id": "tx_scan_005_012",
++    "scanner_id": "005",
++    "sequence": 12,
++    "timestamp": 1717200246,
++    "temp": -18.0356,
++    "battery_level": 88,
++    "temperature_c": -18.0356
++  },
++  {
++    "transaction_id": "tx_scan_005_013",
++    "scanner_id": "005",
++    "sequence": 13,
++    "timestamp": 1717200256,
++    "temp": -17.5219,
++    "battery_level": 87,
++    "temperature_c": -17.5219
++  },
++  {
++    "transaction_id": "tx_scan_005_014",
++    "scanner_id": "005",
++    "sequence": 14,
++    "timestamp": 1717200266,
++    "temp": -17.0082,
++    "battery_level": 86,
++    "temperature_c": -17.0082
++  },
++  {
++    "transaction_id": "tx_scan_005_015",
++    "scanner_id": "005",
++    "sequence": 15,
++    "timestamp": 1717200276,
++    "temp": -16.4945,
++    "battery_level": 85,
++    "temperature_c": -16.4945
++  },
++  {
++    "transaction_id": "tx_scan_005_016",
++    "scanner_id": "005",
++    "sequence": 16,
++    "timestamp": 1717200286,
++    "temp": -15.9808,
++    "battery_level": 84,
++    "temperature_c": -15.9808
++  },
++  {
++    "transaction_id": "tx_scan_005_017",
++    "scanner_id": "005",
++    "sequence": 17,
++    "timestamp": 1717200296,
++    "temp": -15.4671,
++    "battery_level": 83,
++    "temperature_c": -15.4671
++  },
++  {
++    "transaction_id": "tx_scan_005_018",
++    "scanner_id": "005",
++    "sequence": 18,
++    "timestamp": 1717200306,
++    "temp": -14.9534,
++    "battery_level": 82,
++    "temperature_c": -14.9534
++  },
++  {
++    "transaction_id": "tx_scan_005_019",
++    "scanner_id": "005",
++    "sequence": 19,
++    "timestamp": 1717200316,
++    "temp": -14.4397,
++    "battery_level": 81,
++    "temperature_c": -14.4397
++  },
++  {
++    "transaction_id": "tx_scan_005_020",
++    "scanner_id": "005",
++    "sequence": 20,
++    "timestamp": 1717200326,
++    "temp": -18.926,
++    "battery_level": 80,
++    "temperature_c": -18.926
++  },
++  {
++    "transaction_id": "tx_scan_005_021",
++    "scanner_id": "005",
++    "sequence": 21,
++    "timestamp": 1717200336,
++    "temp": -18.4123,
++    "battery_level": 79,
++    "temperature_c": -18.4123
++  },
++  {
++    "transaction_id": "tx_scan_005_022",
++    "scanner_id": "005",
++    "sequence": 22,
++    "timestamp": 1717200346,
++    "temp": -17.8986,
++    "battery_level": 78,
++    "temperature_c": -17.8986
++  },
++  {
++    "transaction_id": "tx_scan_005_023",
++    "scanner_id": "005",
++    "sequence": 23,
++    "timestamp": 1717200356,
++    "temp": -17.3849,
++    "battery_level": 77,
++    "temperature_c": -17.3849
++  },
++  {
++    "transaction_id": "tx_scan_005_024",
++    "scanner_id": "005",
++    "sequence": 24,
++    "timestamp": 1717200366,
++    "temp": -16.8712,
++    "battery_level": 76,
++    "temperature_c": -16.8712
++  },
++  {
++    "transaction_id": "tx_scan_005_025",
++    "scanner_id": "005",
++    "sequence": 25,
++    "timestamp": 1717200376,
++    "temp": -16.3575,
++    "battery_level": 75,
++    "temperature_c": -16.3575
++  },
++  {
++    "transaction_id": "tx_scan_005_026",
++    "scanner_id": "005",
++    "sequence": 26,
++    "timestamp": 1717200386,
++    "temp": -15.8438,
++    "battery_level": 74,
++    "temperature_c": -15.8438
++  },
++  {
++    "transaction_id": "tx_scan_005_027",
++    "scanner_id": "005",
++    "sequence": 27,
++    "timestamp": 1717200396,
++    "temp": -15.3301,
++    "battery_level": 73,
++    "temperature_c": -15.3301
++  },
++  {
++    "transaction_id": "tx_scan_005_028",
++    "scanner_id": "005",
++    "sequence": 28,
++    "timestamp": 1717200406,
++    "temp": -14.8164,
++    "battery_level": 72,
++    "temperature_c": -14.8164
++  },
++  {
++    "transaction_id": "tx_scan_005_029",
++    "scanner_id": "005",
++    "sequence": 29,
++    "timestamp": 1717200416,
++    "temp": -14.3027,
++    "battery_level": 71,
++    "temperature_c": -14.3027
++  },
++  {
++    "transaction_id": "tx_scan_005_030",
++    "scanner_id": "005",
++    "sequence": 30,
++    "timestamp": 1717200426,
++    "temp": -18.789,
++    "battery_level": 70,
++    "temperature_c": -18.789
++  }
++]
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/data/processed/recovered_006.json b/workspace/coldchain-recon/data/processed/recovered_006.json
+new file mode 100644
+--- /dev/null
++++ b/workspace/coldchain-recon/data/processed/recovered_006.json
+@@ -0,0 +1,42 @@
++[
++  {
++    "transaction_id": "tx_scan_006_001",
++    "scanner_id": "006",
++    "sequence": 1,
++    "timestamp": 1717200136,
++    "temp_dc": -185,
++    "battery_level": 90,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.5
++  },
++  {
++    "transaction_id": "tx_scan_006_002",
++    "scanner_id": "006",
++    "sequence": 2,
++    "timestamp": 1717200146,
++    "temp_dc": -180,
++    "battery_level": 90,
++    "fw": "fw_3.1.0",
++    "temperature_c": -18.0
++  },
++  {
++    "transaction_id": "tx_scan_006_005",
++    "scanner_id": "006",
++    "sequence": 5,
++    "timestamp": 1717200176,
++    "temp_dc": -165,
++    "battery_level": 90,
++    "fw": "fw_3.1.0",
++    "temperature_c": -16.5
++  },
++  {
++    "transaction_id": "tx_scan_006_008",
++    "scanner_id": "006",
++    "sequence": 8,
++    "timestamp": 1717200206,
++    "temp_dc": -150,
++    "battery_level": 90,
++    "fw": "fw_3.1.0",
++    "temperature_c": -15.0
++  }
++]
+\ No newline at end of file
+diff --git a/workspace/coldchain-recon/recon_pipeline.py b/workspace/coldchain-recon/recon_pipeline.py
+--- a/workspace/coldchain-recon/recon_pipeline.py
++++ b/workspace/coldchain-recon/recon_pipeline.py
+@@ -12,7 +12,7 @@
+ from stages.consolidation import consolidate_and_checksum
+ 
+ def main():
+-    parser = argparse.ArgumentParser(description="Cold-Chain Telemetry and Lineage Reconciliation Pipeline")
++    parser = argparse.ArgumentParser()
+     parser.add_argument("--config", default="config/pipeline_config.json")
+     parser.add_argument("--data-dir", default="data/raw")
+     parser.add_argument("--dlq-dir", default="data/raw/dlq")
+@@ -20,8 +20,30 @@
+     parser.add_argument("--output-dir", default="data/processed")
+     args = parser.parse_args()
+ 
+-    # TODO: Load configs, handle directories, execute recovery modules and orchestrate outcomes.
+-    raise NotImplementedError("Orchestration pipeline flow is not completed.")
++    with open(args.config, "r") as f:
++        config = json.load(f)
++
++    if not os.path.exists(args.output_dir):
++        os.makedirs(args.output_dir)
++
++    # 1. Recover
++    recover_ledgers(args.data_dir, args.output_dir, config)
++
++    # 2. Aggregate
++    aggregate_metrics(args.metrics_file, config, args.output_dir)
++
++    # 3. Replay
++    records, audit = replay_dead_letters(args.output_dir, args.dlq_dir, config)
++    with open(os.path.join(args.output_dir, "audit_replay.json"), "w") as f:
++        json.dump(audit, f, indent=2)
++
++    # 4. Consolidate
++    consolidate_and_checksum(
++        records,
++        os.path.join(args.output_dir, "consolidated_ledger.json"),
++        os.path.join(args.output_dir, "ledger_root.bin"),
++        os.path.join(args.output_dir, "ledger_signature.bin")
++    )
+ 
+ if __name__ == "__main__":
+     main()
+diff --git a/workspace/coldchain-recon/stages/aggregation.py b/workspace/coldchain-recon/stages/aggregation.py
+--- a/workspace/coldchain-recon/stages/aggregation.py
++++ b/workspace/coldchain-recon/stages/aggregation.py
+@@ -1,6 +1,43 @@
+-def aggregate_metrics(metrics_file: str, config: dict) -> list:
+-    """
+-    Processes OpenTelemetry metrics, filters out non-whitelisted attributes,
+-    and aggregates them into hourly windows.
+-    """
+-    raise NotImplementedError("Stage 2: aggregate_metrics is not implemented yet.")
++import json
++import collections
++
++def aggregate_metrics(metrics_file, config, output_dir):
++    interval = config["metric_config"]["aggregation_interval_hours"]
++    whitelist = set(config["metric_config"]["whitelisted_attributes"])
++    
++    # Need to reuse recovery logic to parse metrics.cctf
++    from stages.recovery import recover_ledgers
++    # Create a dummy output dir for recovery
++    import tempfile
++    import os
++    with tempfile.TemporaryDirectory() as tmpdir:
++        # We only need the recovery logic for metrics.cctf
++        # We'll just run it on the metrics file
++        os.makedirs(os.path.join(tmpdir, "data"))
++        import shutil
++        shutil.copy(metrics_file, os.path.join(tmpdir, "data", "scanner_metrics.cctf"))
++        recovered = recover_ledgers(os.path.join(tmpdir, "data"), tmpdir, config)
++    
++    metrics = recovered.get("metrics", [])
++    
++    grouped = collections.defaultdict(list)
++    for m in metrics:
++        ts = m.get("timestamp", 0)
++        bucket = ts - (ts % (interval * 3600))
++        attrs = {k: v for k, v in m.items() if k in whitelist}
++        key = (m.get("metric_name"), bucket, json.dumps(attrs, sort_keys=True))
++        grouped[key].append(m.get("value", 0))
++        
++    results = []
++    for (name, bucket, attrs_str), values in grouped.items():
++        results.append({
++            "metric_name": name,
++            "timestamp": bucket,
++            "value": round(sum(values) / len(values), 4),
++            "attributes": json.loads(attrs_str)
++        })
++        
++    results.sort(key=lambda x: (x["metric_name"], x["timestamp"], json.dumps(x["attributes"], sort_keys=True)))
++    
++    with open(os.path.join(output_dir, "aggregated_metrics.json"), "w") as f:
++        json.dump(results, f, indent=2)
+diff --git a/workspace/coldchain-recon/stages/consolidation.py b/workspace/coldchain-recon/stages/consolidation.py
+--- a/workspace/coldchain-recon/stages/consolidation.py
++++ b/workspace/coldchain-recon/stages/consolidation.py
+@@ -1,8 +1,33 @@
+-def consolidate_and_checksum(all_records: list, output_path: str, root_path: str, sig_path: str) -> str:
+-    """
+-    Canonicalizes and sorts all records, writing the consolidated ledger to output_path.
+-    Computes the order-dependent chained SHA-256 root (written to root_path) and the
+-    record-count-derived HMAC-SHA256 signature (written to sig_path).
+-    Returns the hex string of the chained root.
+-    """
+-    raise NotImplementedError("Stage 4: consolidate_and_checksum is not implemented yet.")
++import json
++import hashlib
++import hmac
++
++def consolidate_and_checksum(all_records, output_path, root_path, sig_path):
++    all_records.sort(key=lambda x: (x["scanner_id"], x["sequence"], x["timestamp"]))
++    
++    with open(output_path, "w") as f:
++        json.dump(all_records, f, indent=2)
++        
++    state = hashlib.sha256(b"CCTF-ROOT-V1").digest()
++    for rec in all_records:
++        proj = {
++            "transaction_id": rec["transaction_id"],
++            "scanner_id": rec["scanner_id"],
++            "sequence": rec["sequence"],
++            "timestamp": rec["timestamp"],
++            "temperature_c": round(rec["temperature_c"], 2)
++        }
++        proj_bytes = json.dumps(proj, separators=(",", ":"), sort_keys=True).encode("utf-8")
++        state = hashlib.sha256(state + proj_bytes).digest()
++        
++    with open(root_path, "wb") as f:
++        f.write(state)
++        
++    N = len(all_records)
++    key = hashlib.sha256(b"coldchain-fleet|" + str(N).encode("utf-8")).digest()
++    sig = hmac.new(key, state, hashlib.sha256).digest()
++    
++    with open(sig_path, "wb") as f:
++        f.write(sig)
++        
++    return state.hex()
+diff --git a/workspace/coldchain-recon/stages/recovery.py b/workspace/coldchain-recon/stages/recovery.py
+--- a/workspace/coldchain-recon/stages/recovery.py
++++ b/workspace/coldchain-recon/stages/recovery.py
+@@ -1,7 +1,95 @@
+-def recover_ledgers(data_dir: str, output_dir: str) -> dict:
+-    """
+-    Recovers scanner transaction ledgers from data_dir.
+-    Handles partial writes (truncated JSON files) and atomic-rename gaps.
+-    Writes recovered files to output_dir and returns audit dictionary.
+-    """
+-    raise NotImplementedError("Stage 1: recover_ledgers is not implemented yet.")
++import os
++import json
++import struct
++import zlib
++
++def recover_ledgers(data_dir, output_dir, config):
++    schema_versions = config.get("schema_versions", {})
++    all_recovered = {}
++    audit_log = {"files_processed": 0, "frames_recovered": 0}
++
++    # Find all scanner files
++    files = [f for f in os.listdir(data_dir) if f.startswith("scanner_") and (f.endswith(".cctf") or f.endswith(".cctf.tmp"))]
++    
++    for filename in files:
++        scanner_id = filename.split('_')[2].split('.')[0]
++        path = os.path.join(data_dir, filename)
++        
++        records = []
++        pending = []
++        savepoints = {}
++        
++        with open(path, "rb") as f:
++            chain = 0
++            seq = 0
++            while True:
++                header = f.read(10)
++                if len(header) < 10: break
++                if header[0:2] != b"CC": break
++                
++                version = header[2]
++                ftype = header[3]
++                fseq = struct.unpack(">I", header[4:8])[0]
++                plen = struct.unpack(">H", header[8:10])[0]
++                
++                payload_data = f.read(plen)
++                footer = f.read(8)
++                if len(footer) < 8: break
++                
++                crc_stored = struct.unpack(">I", footer[0:4])[0]
++                chain_stored = struct.unpack(">I", footer[4:8])[0]
++                
++                # CRC validation
++                data_to_crc = header + payload_data
++                crc_calc = zlib.crc32(data_to_crc) & 0xFFFFFFFF
++                if crc_calc != crc_stored: break
++                
++                # Chain validation
++                # chain_i = zlib.crc32(struct.pack(">I", chain_{i-1}) + struct.pack(">I", crc_i))
++                chain_calc = zlib.crc32(struct.pack(">I", chain) + struct.pack(">I", crc_calc)) & 0xFFFFFFFF
++                if chain_calc != chain_stored: break
++                chain = chain_calc
++                
++                # Process payload
++                try:
++                    payload = json.loads(payload_data.decode("utf-8")) if plen > 0 else {}
++                except:
++                    break
++                
++                if ftype == 1: # TXN
++                    # Migrate schema
++                    schema = schema_versions.get(str(version), {})
++                    field = schema.get("temperature_field")
++                    val = payload.get(field)
++                    if schema.get("scale") == "deci_celsius":
++                        val = val / 10.0
++                    payload["temperature_c"] = val
++                    payload["scanner_id"] = scanner_id
++                    pending.append(payload)
++                elif ftype == 5: # SAVEPOINT
++                    savepoints[payload.get("savepoint")] = len(pending)
++                elif ftype == 6: # ROLLBACK
++                    name = payload.get("savepoint")
++                    if name in savepoints:
++                        idx = savepoints[name]
++                        pending = pending[:idx]
++                        savepoints = {k: v for k, v in savepoints.items() if v <= idx}
++                elif ftype == 3: # COMMIT
++                    records.extend(pending)
++                    pending = []
++                    savepoints = {}
++                elif ftype == 4: # ABORT
++                    pending = []
++                    savepoints = {}
++                    
++        all_recovered[scanner_id] = records
++        audit_log["files_processed"] += 1
++        audit_log["frames_recovered"] += len(records)
++        
++        with open(os.path.join(output_dir, f"recovered_{scanner_id}.json"), "w") as out:
++            json.dump(records, out, indent=2)
++
++    with open(os.path.join(output_dir, "audit_recovery.json"), "w") as out:
++        json.dump(audit_log, out, indent=2)
++        
++    return all_recovered
+diff --git a/workspace/coldchain-recon/stages/replay.py b/workspace/coldchain-recon/stages/replay.py
+--- a/workspace/coldchain-recon/stages/replay.py
++++ b/workspace/coldchain-recon/stages/replay.py
+@@ -1,6 +1,39 @@
+-def replay_dead_letters(recovered_dir: str, dlq_dir: str, config: dict) -> tuple:
+-    """
+-    Reconciles dead-letter log records with recovered records.
+-    Filters out duplicates within lock timeout, returns consolidated list and audit info.
+-    """
+-    raise NotImplementedError("Stage 3: replay_dead_letters is not implemented yet.")
++import os
++import json
++from stages.recovery import recover_ledgers
++
++def replay_dead_letters(recovered_dir, dlq_dir, config):
++    all_records = {}
++    for f in os.listdir(recovered_dir):
++        if f.startswith("recovered_") and f.endswith(".json"):
++            scanner_id = f[10:-5]
++            with open(os.path.join(recovered_dir, f), "r") as r:
++                all_records[scanner_id] = {rec["transaction_id"]: rec for rec in json.load(r)}
++
++    dlq_records = recover_ledgers(dlq_dir, dlq_dir, config)
++    
++    audit = {"integrated_dlq_records": 0, "discarded_duplicates": 0}
++    
++    for scanner_id, records in dlq_records.items():
++        if scanner_id not in all_records:
++            all_records[scanner_id] = {}
++        
++        for rec in records:
++            tid = rec["transaction_id"]
++            if tid in all_records[scanner_id]:
++                existing = all_records[scanner_id][tid]
++                drift = abs(rec["timestamp"] - existing["timestamp"])
++                if drift > config["lock_timeout_sec"]:
++                    all_records[scanner_id][tid] = rec
++                    audit["integrated_dlq_records"] += 1
++                else:
++                    audit["discarded_duplicates"] += 1
++            else:
++                all_records[scanner_id][tid] = rec
++                audit["integrated_dlq_records"] += 1
++                
++    flat_records = []
++    for scanner_id in all_records:
++        flat_records.extend(all_records[scanner_id].values())
++        
++    return flat_records, audit

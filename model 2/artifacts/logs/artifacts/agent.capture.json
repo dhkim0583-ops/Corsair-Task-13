@@ -1,0 +1,34 @@
+{
+  "kind": "image-diff",
+  "script_version": "4",
+  "root": "/",
+  "baseline": {
+    "version": "4",
+    "generated_at": "2026-09-16T05:56:51Z",
+    "files": 9998,
+    "pristine_copies": 89,
+    "pristine_bytes": 283359,
+    "package_db": "dpkg"
+  },
+  "counts": {
+    "added": 7,
+    "modified": 5,
+    "deleted": 0,
+    "unchanged": 9993,
+    "walked": 10005,
+    "baseline_now_excluded": 0,
+    "under_unreadable_dirs": 0
+  },
+  "rehashed": 2,
+  "unreadable_dir_count": 0,
+  "patch": {
+    "stanzas": 12,
+    "bytes": 44079,
+    "empty": false
+  },
+  "not_rendered": [],
+  "notes": [],
+  "version_mismatch": null,
+  "collect_sec": 0.14,
+  "unreadable_dirs": []
+}

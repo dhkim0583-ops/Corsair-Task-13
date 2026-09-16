@@ -1,0 +1,27 @@
+{
+    "task": {
+        "path": "/__modal/volumes/vo-RvMGBCFd2yaZZR6HWopTZK/projects/coldchain-reconciliation-pipeline-bf770ffb"
+    },
+    "trial_name": "coldchain-reconciliation-pipelin__Fg2j2FJ",
+    "trials_dir": "jobs/2026-09-16__06-03-04",
+    "agent": {
+        "name": "terminus-2",
+        "model_name": "gemini/gemini-3.1-flash-lite",
+        "kwargs": {
+            "parser_name": "xml",
+            "llm_call_kwargs": {
+                "max_tokens": 4096
+            }
+        }
+    },
+    "environment": {
+        "type": "docker",
+        "extra_docker_compose": [
+            "/work/pipeline/overlay-oracle.yaml"
+        ]
+    },
+    "extra_instruction_paths": [
+        "/work/pipeline/response-size-guidance.txt"
+    ],
+    "job_id": "a67bf7cb-de9c-40cf-8120-91842705f4f3"
+}

@@ -1,0 +1,50 @@
++ export GIT_CONFIG_GLOBAL=/tmp/harbor-capture-gitconfig
++ GIT_CONFIG_GLOBAL=/tmp/harbor-capture-gitconfig
++ git config --global --add safe.directory '*'
++ id
++ git --version
++ ROOT=
++ for d in /app /app/* /workspace /src
++ '[' -d /app ']'
++ continue
++ for d in /app /app/* /workspace /src
++ '[' -d '/app/*' ']'
++ continue
++ for d in /app /app/* /workspace /src
++ '[' -d /workspace ']'
++ git -C /workspace rev-parse --git-dir
++ for d in /app /app/* /workspace /src
++ '[' -d /src ']'
++ continue
++ '[' -z '' ']'
++++ find /app /workspace /src -maxdepth 3 -name .git -print -quit
+++ dirname ''
++ ROOT=.
++ case "$ROOT" in
++ ROOT=
++ '[' -z '' ']'
++ BASELINE_DONE=0
++ PY=
++ for c in python3 python
++ command -v python3
++ PY=python3
++ break
++ '[' -n python3 ']'
++ '[' -f /.harbor-capture/harbor_capture.py ']'
++ '[' -f /.harbor-capture/manifest.tsv ']'
++ python3 /.harbor-capture/harbor_capture.py collect --root / --store /.harbor-capture --out /logs/artifacts --expect-version 4
+harbor_capture 4: +13 ~5 -0 (10011 walked, 2 rehashed), patch 87200 B, 2 not rendered, 0.1s
++ BASELINE_DONE=1
++ SNAP=
++ for d in /app /workspace /src
++ '[' -d /app ']'
++ for d in /app /workspace /src
++ '[' -d /workspace ']'
++ SNAP=/workspace
++ break
++ '[' 1 = 1 ']'
++ :
+++ wc -c
++ echo 'capture finished, patch bytes: 87200'
+capture finished, patch bytes: 87200
++ '[' 0 = 1 ']'
